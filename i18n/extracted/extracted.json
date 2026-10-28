@@ -1,0 +1,3753 @@
+{
+  "home_emergencysossystem": {
+    "text": "home.emergencySOSSystem",
+    "sources": [
+      "app\\page.tsx"
+    ]
+  },
+  "home_emergencysosdescription": {
+    "text": "home.emergencySOSDescription",
+    "sources": [
+      "app\\page.tsx"
+    ]
+  },
+  "home_emergencyresponsecenter": {
+    "text": "home.emergencyResponseCenter",
+    "sources": [
+      "app\\page.tsx"
+    ]
+  },
+  "home_emergencyresponsecenterdescription": {
+    "text": "home.emergencyResponseCenterDescription",
+    "sources": [
+      "app\\page.tsx"
+    ]
+  },
+  "safetyguidelines": {
+    "text": "safetyGuidelines",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "safetysubtitle": {
+    "text": "safetySubtitle",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "emergencyprotocols": {
+    "text": "emergencyProtocols",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "privacypolicy": {
+    "text": "privacyPolicy",
+    "sources": [
+      "app\\safety\\page.tsx",
+      "app\\join\\page.tsx"
+    ]
+  },
+  "downloadpdf": {
+    "text": "downloadPDF",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "criticalreminder": {
+    "text": "criticalReminder",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "criticalremindertext": {
+    "text": "criticalReminderText",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "emergencysafetyprotocols": {
+    "text": "emergencySafetyProtocols",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "dosanddonts": {
+    "text": "dosAndDonts",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "thingstodo": {
+    "text": "thingsToDo",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "thingsnottodo": {
+    "text": "thingsNotToDo",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "privacydatahandling": {
+    "text": "privacyDataHandling",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "yourprivacymatters": {
+    "text": "yourPrivacyMatters",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "privacydescription": {
+    "text": "privacyDescription",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "gdprcompliance": {
+    "text": "gdprCompliance",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "gdprtext": {
+    "text": "gdprText",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "right1": {
+    "text": "right1",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "right2": {
+    "text": "right2",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "right3": {
+    "text": "right3",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "right4": {
+    "text": "right4",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "right5": {
+    "text": "right5",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "legaldisclaimers": {
+    "text": "legalDisclaimers",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "fullterms": {
+    "text": "fullTerms",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "legalpage": {
+    "text": "legalPage",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "lastupdated": {
+    "text": "lastUpdated",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "responderbestpractices": {
+    "text": "responderBestPractices",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "responderguidelines": {
+    "text": "responderGuidelines",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "responderguidelinesdesc": {
+    "text": "responderGuidelinesDesc",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "downloadguidelines": {
+    "text": "downloadGuidelines",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "downloadguidelinesdesc": {
+    "text": "downloadGuidelinesDesc",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "questionsorconcerns": {
+    "text": "questionsOrConcerns",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "supportteamavailable": {
+    "text": "supportTeamAvailable",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "contactsupport": {
+    "text": "contactSupport",
+    "sources": [
+      "app\\safety\\page.tsx",
+      "app\\docs\\page.tsx",
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "viewdocumentation": {
+    "text": "viewDocumentation",
+    "sources": [
+      "app\\safety\\page.tsx"
+    ]
+  },
+  "becomeverifiedresponder": {
+    "text": "becomeVerifiedResponder",
+    "sources": [
+      "app\\responders\\page.tsx",
+      "app\\join\\page.tsx"
+    ]
+  },
+  "joinrespondernetwork": {
+    "text": "joinResponderNetwork",
+    "sources": [
+      "app\\responders\\page.tsx"
+    ]
+  },
+  "backgroundverified": {
+    "text": "backgroundVerified",
+    "sources": [
+      "app\\responders\\page.tsx",
+      "app\\join\\page.tsx"
+    ]
+  },
+  "trustscored": {
+    "text": "trustScored",
+    "sources": [
+      "app\\responders\\page.tsx"
+    ]
+  },
+  "24_7support": {
+    "text": "24/7Support",
+    "sources": [
+      "app\\responders\\page.tsx"
+    ]
+  },
+  "startverificationprocess": {
+    "text": "startVerificationProcess",
+    "sources": [
+      "app\\responders\\page.tsx"
+    ]
+  },
+  "responders": {
+    "text": "Responders",
+    "sources": [
+      "app\\responders\\page.tsx"
+    ]
+  },
+  "verified": {
+    "text": "Verified",
+    "sources": [
+      "app\\responders\\page.tsx"
+    ]
+  },
+  "verifiedrespondersonly": {
+    "text": "verifiedRespondersOnly",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "responderportal": {
+    "text": "responderPortal",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "responderportaldesc": {
+    "text": "responderPortalDesc",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "notresponderyet": {
+    "text": "notResponderYet",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "applynow": {
+    "text": "applyNow",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "tojoinnetwork": {
+    "text": "toJoinNetwork",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "signintoportal": {
+    "text": "signInToPortal",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "accessdashboard": {
+    "text": "accessDashboard",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "email": {
+    "text": "email",
+    "sources": [
+      "app\\portal\\page.tsx",
+      "app\\contact\\page.tsx",
+      "components\\auth\\login-form.tsx"
+    ]
+  },
+  "emailplaceholder": {
+    "text": "emailPlaceholder",
+    "sources": [
+      "app\\portal\\page.tsx",
+      "app\\join\\page.tsx",
+      "app\\contact\\page.tsx",
+      "components\\auth\\login-form.tsx"
+    ]
+  },
+  "password": {
+    "text": "password",
+    "sources": [
+      "app\\portal\\page.tsx",
+      "components\\auth\\login-form.tsx"
+    ]
+  },
+  "rememberme": {
+    "text": "rememberMe",
+    "sources": [
+      "app\\portal\\page.tsx",
+      "components\\auth\\login-form.tsx"
+    ]
+  },
+  "forgotpassword": {
+    "text": "forgotPassword",
+    "sources": [
+      "app\\portal\\page.tsx",
+      "components\\auth\\login-form.tsx"
+    ]
+  },
+  "signingin": {
+    "text": "signingIn",
+    "sources": [
+      "app\\portal\\page.tsx",
+      "components\\auth\\login-form.tsx"
+    ]
+  },
+  "signin": {
+    "text": "signIn",
+    "sources": [
+      "app\\portal\\page.tsx",
+      "components\\auth\\login-form.tsx"
+    ]
+  },
+  "newtobridgex": {
+    "text": "newToBridgeX",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "applyasresponder": {
+    "text": "applyAsResponder",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "securelogin": {
+    "text": "secureLogin",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "securelogindesc": {
+    "text": "secureLoginDesc",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "portalfeatures": {
+    "text": "portalFeatures",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "portalfeaturesdesc": {
+    "text": "portalFeaturesDesc",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "howitworks": {
+    "text": "howItWorks",
+    "sources": [
+      "app\\portal\\page.tsx",
+      "app\\docs\\page.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "responderworkflow": {
+    "text": "responderWorkflow",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "receivealert": {
+    "text": "receiveAlert",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "receivealertdesc": {
+    "text": "receiveAlertDesc",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "reviewdetails": {
+    "text": "reviewDetails",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "reviewdetailsdesc": {
+    "text": "reviewDetailsDesc",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "communicatevictim": {
+    "text": "communicateVictim",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "communicatevictimdesc": {
+    "text": "communicateVictimDesc",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "respondonsite": {
+    "text": "respondOnSite",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "respondonsitedesc": {
+    "text": "respondOnSiteDesc",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "documentresolve": {
+    "text": "documentResolve",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "documentresolvedesc": {
+    "text": "documentResolveDesc",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "readytomakedifference": {
+    "text": "readyToMakeDifference",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "jointhousandsofresponders": {
+    "text": "joinThousandsOfResponders",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "learnmore": {
+    "text": "learnMore",
+    "sources": [
+      "app\\portal\\page.tsx"
+    ]
+  },
+  "emergencymap": {
+    "text": "emergencyMap",
+    "sources": [
+      "app\\map\\page.tsx"
+    ]
+  },
+  "findnearbyresponders": {
+    "text": "findNearbyResponders",
+    "sources": [
+      "app\\map\\page.tsx"
+    ]
+  },
+  "error": {
+    "text": "error",
+    "sources": [
+      "app\\join\\page.tsx",
+      "app\\contact\\page.tsx",
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "filetoolarge20mb": {
+    "text": "fileTooLarge20MB",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "joinglobalnetwork": {
+    "text": "joinGlobalNetwork",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "joinnetworkdesc": {
+    "text": "joinNetworkDesc",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "professionaltools": {
+    "text": "professionalTools",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "globalimpact": {
+    "text": "globalImpact",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "whocanjoin": {
+    "text": "whoCanJoin",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "whocanjoindesc": {
+    "text": "whoCanJoinDesc",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "ngos": {
+    "text": "ngos",
+    "sources": [
+      "app\\join\\page.tsx",
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "ngosdesc": {
+    "text": "ngosDesc",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "hospitals": {
+    "text": "hospitals",
+    "sources": [
+      "app\\join\\page.tsx",
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "hospitalsdesc": {
+    "text": "hospitalsDesc",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "rescueteams": {
+    "text": "rescueTeams",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "rescueteamsdesc": {
+    "text": "rescueTeamsDesc",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "volunteers": {
+    "text": "volunteers",
+    "sources": [
+      "app\\join\\page.tsx",
+      "components\\map-view.tsx"
+    ]
+  },
+  "volunteersdesc": {
+    "text": "volunteersDesc",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "benefitsofjoining": {
+    "text": "benefitsOfJoining",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "verificationprocess": {
+    "text": "verificationProcess",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "verificationprocessdesc": {
+    "text": "verificationProcessDesc",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "submitapplication": {
+    "text": "submitApplication",
+    "sources": [
+      "app\\join\\page.tsx",
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "applicationformdesc": {
+    "text": "applicationFormDesc",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "organizationtype": {
+    "text": "organizationType",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "selecttype": {
+    "text": "selectType",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "ngo": {
+    "text": "ngo",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "hospital": {
+    "text": "hospital",
+    "sources": [
+      "app\\join\\page.tsx",
+      "components\\map-view.tsx"
+    ]
+  },
+  "rescueteam": {
+    "text": "rescueTeam",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "volunteer": {
+    "text": "volunteer",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "organizationname": {
+    "text": "organizationName",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "orgnameplaceholder": {
+    "text": "orgNamePlaceholder",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "contactpersonname": {
+    "text": "contactPersonName",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "nameplaceholder": {
+    "text": "namePlaceholder",
+    "sources": [
+      "app\\join\\page.tsx",
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "emailaddress": {
+    "text": "emailAddress",
+    "sources": [
+      "app\\join\\page.tsx",
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "phonenumber": {
+    "text": "phoneNumber",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "country": {
+    "text": "country",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "countryplaceholder": {
+    "text": "countryPlaceholder",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "city": {
+    "text": "city",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "cityplaceholder": {
+    "text": "cityPlaceholder",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "address": {
+    "text": "address",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "addressplaceholder": {
+    "text": "addressPlaceholder",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "describeexpertise": {
+    "text": "describeExpertise",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "descriptionplaceholder": {
+    "text": "descriptionPlaceholder",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "descriptionhelp": {
+    "text": "descriptionHelp",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "verificationdocuments": {
+    "text": "verificationDocuments",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "documentshelp": {
+    "text": "documentsHelp",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "requireddocuments": {
+    "text": "requiredDocuments",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "doc1": {
+    "text": "doc1",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "doc2": {
+    "text": "doc2",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "doc3": {
+    "text": "doc3",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "doc4": {
+    "text": "doc4",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "doc5": {
+    "text": "doc5",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "agreetoterms": {
+    "text": "agreeToTerms",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "termsandconditions": {
+    "text": "termsAndConditions",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "andrespondercode": {
+    "text": "andResponderCode",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "termsnote": {
+    "text": "termsNote",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "submitting": {
+    "text": "submitting",
+    "sources": [
+      "app\\join\\page.tsx",
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "whathappensnext": {
+    "text": "whatHappensNext",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "confirmationemail": {
+    "text": "confirmationEmail",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "confirmationemaildesc": {
+    "text": "confirmationEmailDesc",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "reviewprocess": {
+    "text": "reviewProcess",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "reviewprocessdesc": {
+    "text": "reviewProcessDesc",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "activation": {
+    "text": "activation",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "activationdesc": {
+    "text": "activationDesc",
+    "sources": [
+      "app\\join\\page.tsx"
+    ]
+  },
+  "docstitle": {
+    "text": "docsTitle",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "docssubtitle": {
+    "text": "docsSubtitle",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "contents": {
+    "text": "contents",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "docsoverview": {
+    "text": "docsOverview",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "docsoverviewtext": {
+    "text": "docsOverviewText",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "ourmission": {
+    "text": "ourMission",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "missiontext": {
+    "text": "missionText",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "languages": {
+    "text": "languages",
+    "sources": [
+      "app\\docs\\page.tsx",
+      "components\\hero.tsx"
+    ]
+  },
+  "alertspeed": {
+    "text": "alertSpeed",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "available": {
+    "text": "available",
+    "sources": [
+      "app\\docs\\page.tsx",
+      "components\\hero.tsx"
+    ]
+  },
+  "step1title": {
+    "text": "step1Title",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "step1desc": {
+    "text": "step1Desc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "step2title": {
+    "text": "step2Title",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "step2desc": {
+    "text": "step2Desc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "step3title": {
+    "text": "step3Title",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "step3desc": {
+    "text": "step3Desc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "step4title": {
+    "text": "step4Title",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "step4desc": {
+    "text": "step4Desc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "step5title": {
+    "text": "step5Title",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "step5desc": {
+    "text": "step5Desc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "step": {
+    "text": "step",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "features": {
+    "text": "features",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "multilingualsupport": {
+    "text": "multilingualSupport",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "poweredbylingo": {
+    "text": "poweredByLingo",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "lingodescription": {
+    "text": "lingoDescription",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "instanttranslation": {
+    "text": "instantTranslation",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "instanttransdesc": {
+    "text": "instantTransDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "contextaware": {
+    "text": "contextAware",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "contextdesc": {
+    "text": "contextDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "voicesupport": {
+    "text": "voiceSupport",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "voicedesc": {
+    "text": "voiceDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "offlinecache": {
+    "text": "offlineCache",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "offlinedesc": {
+    "text": "offlineDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "useronboarding": {
+    "text": "userOnboarding",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "gettingstarted": {
+    "text": "gettingStarted",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "gettingstarteddesc": {
+    "text": "gettingStartedDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "createaccount": {
+    "text": "createAccount",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "createaccountdesc": {
+    "text": "createAccountDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "enablelocation": {
+    "text": "enableLocation",
+    "sources": [
+      "app\\docs\\page.tsx",
+      "components\\map-view.tsx"
+    ]
+  },
+  "enablelocationdesc": {
+    "text": "enableLocationDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "setupnotifications": {
+    "text": "setupNotifications",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "setupnotificationsdesc": {
+    "text": "setupNotificationsDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "chooselanguage": {
+    "text": "chooseLanguage",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "chooselanguagedesc": {
+    "text": "chooseLanguageDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "testsystem": {
+    "text": "testSystem",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "testsystemdesc": {
+    "text": "testSystemDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "responderonboarding": {
+    "text": "responderOnboarding",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "becomeresponder": {
+    "text": "becomeResponder",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "becomeresponderdesc": {
+    "text": "becomeResponderDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "submitapplicationdesc": {
+    "text": "submitApplicationDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "uploaddocuments": {
+    "text": "uploadDocuments",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "uploaddocumentsdesc": {
+    "text": "uploadDocumentsDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "backgroundcheck": {
+    "text": "backgroundCheck",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "backgroundcheckdesc": {
+    "text": "backgroundCheckDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "platformtraining": {
+    "text": "platformTraining",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "platformtrainingdesc": {
+    "text": "platformTrainingDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "activateprofile": {
+    "text": "activateProfile",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "activateprofiledesc": {
+    "text": "activateProfileDesc",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "startapplication": {
+    "text": "startApplication",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "emergencyusageguide": {
+    "text": "emergencyUsageGuide",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "howtoreport": {
+    "text": "howToReport",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "includeinsos": {
+    "text": "includeInSOS",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "sositem1": {
+    "text": "sosItem1",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "sositem2": {
+    "text": "sosItem2",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "sositem3": {
+    "text": "sosItem3",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "sositem4": {
+    "text": "sosItem4",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "sositem5": {
+    "text": "sosItem5",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "sositem6": {
+    "text": "sosItem6",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "safetydos": {
+    "text": "safetyDos",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "do1": {
+    "text": "do1",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "do2": {
+    "text": "do2",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "do3": {
+    "text": "do3",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "do4": {
+    "text": "do4",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "do5": {
+    "text": "do5",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "safetydonts": {
+    "text": "safetyDonts",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "dont1": {
+    "text": "dont1",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "dont2": {
+    "text": "dont2",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "dont3": {
+    "text": "dont3",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "dont4": {
+    "text": "dont4",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "dont5": {
+    "text": "dont5",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "faq": {
+    "text": "faq",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "stillhavequestions": {
+    "text": "stillHaveQuestions",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "contactsupporttext": {
+    "text": "contactSupportText",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "searching": {
+    "text": "Searching...",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "no_results_found": {
+    "text": "No results found",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "search_documentation": {
+    "text": "Search documentation...",
+    "sources": [
+      "app\\docs\\page.tsx"
+    ]
+  },
+  "filetoolarge": {
+    "text": "fileTooLarge",
+    "sources": [
+      "app\\contact\\page.tsx",
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "contactsupportdesc": {
+    "text": "contactSupportDesc",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "contactinfo": {
+    "text": "contactInfo",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "multiplewaystoreach": {
+    "text": "multipleWaysToReach",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "emergencyhotline": {
+    "text": "emergencyHotline",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "headquarters": {
+    "text": "headquarters",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "availability": {
+    "text": "availability",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "responsetime": {
+    "text": "responseTime",
+    "sources": [
+      "app\\contact\\page.tsx",
+      "components\\hero.tsx"
+    ]
+  },
+  "emergencyissues": {
+    "text": "emergencyIssues",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "technicalsupport": {
+    "text": "technicalSupport",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "generalinquiries": {
+    "text": "generalInquiries",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "inemergency": {
+    "text": "inEmergency",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "usesosalert": {
+    "text": "useSOSAlert",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "sendsosalert": {
+    "text": "sendSOSAlert",
+    "sources": [
+      "app\\contact\\page.tsx",
+      "components\\hero.tsx"
+    ]
+  },
+  "livechatsoon": {
+    "text": "liveChatSoon",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "livechatdesc": {
+    "text": "liveChatDesc",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "requestsubmitted": {
+    "text": "requestSubmitted",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "requestsubmitteddesc": {
+    "text": "requestSubmittedDesc",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "ticketcreated": {
+    "text": "ticketCreated",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "emailconfirmation": {
+    "text": "emailConfirmation",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "teamnotified": {
+    "text": "teamNotified",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "submitsupportrequest": {
+    "text": "submitSupportRequest",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "fillformbelow": {
+    "text": "fillFormBelow",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "yourname": {
+    "text": "yourName",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "issuecategory": {
+    "text": "issueCategory",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "selectcategory": {
+    "text": "selectCategory",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "emergencysupport": {
+    "text": "emergencySupport",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "technicalissue": {
+    "text": "technicalIssue",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "accounthelp": {
+    "text": "accountHelp",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "bugreport": {
+    "text": "bugReport",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "featurerequest": {
+    "text": "featureRequest",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "generalinquiry": {
+    "text": "generalInquiry",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "categoryhelp": {
+    "text": "categoryHelp",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "subject": {
+    "text": "subject",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "subjectplaceholder": {
+    "text": "subjectPlaceholder",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "message": {
+    "text": "message",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "messageplaceholder": {
+    "text": "messagePlaceholder",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "messagehelp": {
+    "text": "messageHelp",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "attachment": {
+    "text": "attachment",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "attachmenthelp": {
+    "text": "attachmentHelp",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "submitrequest": {
+    "text": "submitRequest",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "foundbug": {
+    "text": "foundBug",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "bugreportinginstructions": {
+    "text": "bugReportingInstructions",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "whattoinclude": {
+    "text": "whatToInclude",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "bugitem1": {
+    "text": "bugItem1",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "bugitem2": {
+    "text": "bugItem2",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "bugitem3": {
+    "text": "bugItem3",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "bugitem4": {
+    "text": "bugItem4",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "bugitem5": {
+    "text": "bugItem5",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "prioritylevels": {
+    "text": "priorityLevels",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "critical": {
+    "text": "critical",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "criticaldesc": {
+    "text": "criticalDesc",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "high": {
+    "text": "high",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "highdesc": {
+    "text": "highDesc",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "medium": {
+    "text": "medium",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "mediumdesc": {
+    "text": "mediumDesc",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "low": {
+    "text": "low",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "lowdesc": {
+    "text": "lowDesc",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "us_1_800_sos_help": {
+    "text": "US: +1 (800) SOS-HELP",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "uk_44_20_sos_help": {
+    "text": "UK: +44 20 SOS-HELP",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "eu_33_1_sos_help": {
+    "text": "EU: +33 1 SOS-HELP",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "san_francisco_ca": {
+    "text": "San Francisco, CA",
+    "sources": [
+      "app\\contact\\page.tsx"
+    ]
+  },
+  "emergencychat": {
+    "text": "emergencyChat",
+    "sources": [
+      "app\\chat\\page.tsx"
+    ]
+  },
+  "realtimemultilingualcomm": {
+    "text": "realtimeMultilingualComm",
+    "sources": [
+      "app\\chat\\page.tsx"
+    ]
+  },
+  "auth_jointhenetwork": {
+    "text": "auth.joinTheNetwork",
+    "sources": [
+      "app\\auth\\register\\page.tsx"
+    ]
+  },
+  "auth_registerasverifiedresponder": {
+    "text": "auth.registerAsVerifiedResponder",
+    "sources": [
+      "app\\auth\\register\\page.tsx"
+    ]
+  },
+  "auth_alreadyhaveaccount": {
+    "text": "auth.alreadyHaveAccount",
+    "sources": [
+      "app\\auth\\register\\page.tsx"
+    ]
+  },
+  "auth_signin": {
+    "text": "auth.signIn",
+    "sources": [
+      "app\\auth\\register\\page.tsx"
+    ]
+  },
+  "bridgex": {
+    "text": "BridgeX",
+    "sources": [
+      "app\\auth\\register\\page.tsx",
+      "app\\auth\\login\\page.tsx",
+      "app\\about\\page.tsx",
+      "components\\hero.tsx",
+      "components\\footer.tsx",
+      "components\\dashboard\\header.tsx"
+    ]
+  },
+  "auth_welcomeback": {
+    "text": "auth.welcomeBack",
+    "sources": [
+      "app\\auth\\login\\page.tsx"
+    ]
+  },
+  "auth_signintodashboard": {
+    "text": "auth.signInToDashboard",
+    "sources": [
+      "app\\auth\\login\\page.tsx"
+    ]
+  },
+  "auth_donthaveaccount": {
+    "text": "auth.dontHaveAccount",
+    "sources": [
+      "app\\auth\\login\\page.tsx"
+    ]
+  },
+  "auth_registerasresponder": {
+    "text": "auth.registerAsResponder",
+    "sources": [
+      "app\\auth\\login\\page.tsx"
+    ]
+  },
+  "bucket": {
+    "text": "bucket",
+    "sources": [
+      "app\\api\\upload\\route.ts"
+    ]
+  },
+  "folder": {
+    "text": "folder",
+    "sources": [
+      "app\\api\\upload\\route.ts"
+    ]
+  },
+  "created_at_updated_at_status": {
+    "text": "created_at, updated_at, status",
+    "sources": [
+      "app\\api\\stats\\route.ts"
+    ]
+  },
+  "location": {
+    "text": "location",
+    "sources": [
+      "app\\api\\stats\\route.ts",
+      "app\\api\\analytics\\geographic\\route.ts",
+      "components\\dashboard\\alerts-table.tsx"
+    ]
+  },
+  "lat": {
+    "text": "lat",
+    "sources": [
+      "app\\api\\responders\\route.ts",
+      "app\\api\\nearby\\route.ts"
+    ]
+  },
+  "lng": {
+    "text": "lng",
+    "sources": [
+      "app\\api\\responders\\route.ts",
+      "app\\api\\nearby\\route.ts"
+    ]
+  },
+  "radius": {
+    "text": "radius",
+    "sources": [
+      "app\\api\\responders\\route.ts",
+      "app\\api\\nearby\\route.ts"
+    ]
+  },
+  "id_organization_verification_status_specialization": {
+    "text": "id,\n        organization,\n        verification_status,\n        specializations,\n        available,\n        user_id,\n        profiles!inner(\n          email\n        ),\n        responder_locations!inner(\n          location,\n          updated_at\n        )",
+    "sources": [
+      "app\\api\\responders\\route.ts"
+    ]
+  },
+  "responderid": {
+    "text": "responderId",
+    "sources": [
+      "app\\api\\responders\\location\\route.ts"
+    ]
+  },
+  "userid": {
+    "text": "userId",
+    "sources": [
+      "app\\api\\push\\route.ts",
+      "app\\api\\notifications\\route.ts",
+      "app\\api\\alerts\\route.ts"
+    ]
+  },
+  "subscription": {
+    "text": "subscription",
+    "sources": [
+      "app\\api\\push\\route.ts"
+    ]
+  },
+  "unreadonly": {
+    "text": "unreadOnly",
+    "sources": [
+      "app\\api\\notifications\\route.ts"
+    ]
+  },
+  "chatid": {
+    "text": "chatId",
+    "sources": [
+      "app\\api\\chat\\messages\\route.ts"
+    ]
+  },
+  "session_token": {
+    "text": "session-token",
+    "sources": [
+      "app\\api\\auth\\login\\route.ts"
+    ]
+  },
+  "days": {
+    "text": "days",
+    "sources": [
+      "app\\api\\analytics\\trends\\route.ts",
+      "app\\api\\analytics\\response-times\\route.ts",
+      "app\\api\\analytics\\response-time\\route.ts",
+      "app\\api\\analytics\\geographic\\route.ts",
+      "app\\api\\analytics\\alerts\\route.ts"
+    ]
+  },
+  "id_status_created_at_resolved_at_priority_response": {
+    "text": "id,\r\n        status,\r\n        created_at,\r\n        resolved_at,\r\n        priority,\r\n        responses!inner(\r\n          id,\r\n          created_at,\r\n          responder_id,\r\n          status\r\n        )",
+    "sources": [
+      "app\\api\\analytics\\response-times\\route.ts"
+    ]
+  },
+  "id_status_urgency_level_created_at_location": {
+    "text": "id,\r\n        status,\r\n        urgency_level,\r\n        created_at,\r\n        location",
+    "sources": [
+      "app\\api\\analytics\\geographic\\route.ts"
+    ]
+  },
+  "id_status_created_at_updated_at_urgency_level_emer": {
+    "text": "id, status, created_at, updated_at, urgency_level, emergency_type",
+    "sources": [
+      "app\\api\\analytics\\alerts\\route.ts"
+    ]
+  },
+  "status": {
+    "text": "status",
+    "sources": [
+      "app\\api\\alerts\\route.ts",
+      "components\\dashboard\\alerts-table.tsx"
+    ]
+  },
+  "limit": {
+    "text": "limit",
+    "sources": [
+      "app\\api\\alerts\\route.ts"
+    ]
+  },
+  "user_id": {
+    "text": "user_id",
+    "sources": [
+      "app\\api\\alerts\\panic\\route.ts",
+      "app\\api\\alerts\\broadcast\\route.ts"
+    ]
+  },
+  "id_user_id_organization_profiles_user_id_name": {
+    "text": "id,\n        user_id,\n        organization,\n        profiles:user_id (\n          name\n        )",
+    "sources": [
+      "app\\api\\alerts\\notify\\route.ts"
+    ]
+  },
+  "our_mission": {
+    "text": "Our Mission",
+    "sources": [
+      "app\\about\\page.tsx"
+    ]
+  },
+  "our_values": {
+    "text": "Our Values",
+    "sources": [
+      "app\\about\\page.tsx"
+    ]
+  },
+  "how_we_work": {
+    "text": "How We Work",
+    "sources": [
+      "app\\about\\page.tsx"
+    ]
+  },
+  "our_impact": {
+    "text": "Our Impact",
+    "sources": [
+      "app\\about\\page.tsx"
+    ]
+  },
+  "voicenotsupported": {
+    "text": "voiceNotSupported",
+    "sources": [
+      "components\\voice-input.tsx",
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "startrecording": {
+    "text": "startRecording",
+    "sources": [
+      "components\\voice-input.tsx",
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "stoprecording": {
+    "text": "stopRecording",
+    "sources": [
+      "components\\voice-input.tsx",
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "clear": {
+    "text": "clear",
+    "sources": [
+      "components\\voice-input.tsx",
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "recording": {
+    "text": "recording",
+    "sources": [
+      "components\\voice-input.tsx",
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "speaknow": {
+    "text": "speakNow",
+    "sources": [
+      "components\\voice-input.tsx",
+      "components\\voice-input-v2.tsx",
+      "components\\sos-interface.tsx"
+    ]
+  },
+  "voiceinput": {
+    "text": "voiceInput",
+    "sources": [
+      "components\\voice-input.tsx"
+    ]
+  },
+  "voiceinputerror": {
+    "text": "voiceInputError",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "nospeechdetected": {
+    "text": "noSpeechDetected",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "microphoneerror": {
+    "text": "microphoneError",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "microphonepermissiondenied": {
+    "text": "microphonePermissionDenied",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "voiceiniterror": {
+    "text": "voiceInitError",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "failedtostart": {
+    "text": "failedToStart",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "checkingvoicesupport": {
+    "text": "checkingVoiceSupport",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "voicenotsupporteddesc": {
+    "text": "voiceNotSupportedDesc",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "initializing": {
+    "text": "initializing",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "transcriptioncomplete": {
+    "text": "transcriptionComplete",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "clicktostartvoice": {
+    "text": "clickToStartVoice",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "voiceinputhint": {
+    "text": "voiceInputHint",
+    "sources": [
+      "components\\voice-input-v2.tsx"
+    ]
+  },
+  "translation_failed_please_try_again": {
+    "text": "Translation failed. Please try again.",
+    "sources": [
+      "components\\translation-demo.tsx"
+    ]
+  },
+  "try_live_translation": {
+    "text": "Try Live Translation",
+    "sources": [
+      "components\\translation-demo.tsx"
+    ]
+  },
+  "emergency_message": {
+    "text": "Emergency Message",
+    "sources": [
+      "components\\translation-demo.tsx"
+    ]
+  },
+  "translation": {
+    "text": "Translation",
+    "sources": [
+      "components\\translation-demo.tsx"
+    ]
+  },
+  "ai_classification": {
+    "text": "AI Classification",
+    "sources": [
+      "components\\translation-demo.tsx"
+    ]
+  },
+  "translation_will_appear_here": {
+    "text": "Translation will appear here",
+    "sources": [
+      "components\\translation-demo.tsx"
+    ]
+  },
+  "type_your_emergency_message": {
+    "text": "Type your emergency message...",
+    "sources": [
+      "components\\translation-demo.tsx"
+    ]
+  },
+  "emergencyalert": {
+    "text": "emergencyAlert",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "alertactive": {
+    "text": "alertActive",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "respondersnotified": {
+    "text": "respondersNotified",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "emergencyinterface": {
+    "text": "emergencyInterface",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "helpinonetap": {
+    "text": "helpInOneTap",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "sendsos": {
+    "text": "sendSOS",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "locationshared": {
+    "text": "locationShared",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "instantcontact": {
+    "text": "instantContact",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "multilingualtranslation": {
+    "text": "multilingualTranslation",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "autoescalate": {
+    "text": "autoEscalate",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "alertqueued": {
+    "text": "alertQueued",
+    "sources": [
+      "components\\sos-interface.tsx"
+    ]
+  },
+  "alertsavedoffline": {
+    "text": "alertSavedOffline",
+    "sources": [
+      "components\\sos-interface.tsx"
+    ]
+  },
+  "autoescalatein": {
+    "text": "autoEscalateIn",
+    "sources": [
+      "components\\sos-interface.tsx"
+    ]
+  },
+  "queued": {
+    "text": "queued",
+    "sources": [
+      "components\\sos-interface.tsx"
+    ]
+  },
+  "alert": {
+    "text": "alert",
+    "sources": [
+      "components\\sos-interface.tsx"
+    ]
+  },
+  "alerts": {
+    "text": "alerts",
+    "sources": [
+      "components\\sos-interface.tsx"
+    ]
+  },
+  "cancelalert": {
+    "text": "cancelAlert",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "emergencytype": {
+    "text": "emergencyType",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "additionaldetails": {
+    "text": "additionalDetails",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "describeemergency": {
+    "text": "describeEmergency",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "voiceemergencydetails": {
+    "text": "voiceEmergencyDetails",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "attachfiles": {
+    "text": "attachFiles",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "broadcasting": {
+    "text": "broadcasting",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "skipdetails": {
+    "text": "skipDetails",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "cancel": {
+    "text": "cancel",
+    "sources": [
+      "components\\sos-interface.tsx",
+      "components\\sos-interface-v2.tsx",
+      "components\\pwa-install-prompt.tsx"
+    ]
+  },
+  "emergencytypes": {
+    "text": "emergencyTypes",
+    "sources": [
+      "components\\sos-interface.tsx"
+    ]
+  },
+  "sosdescription": {
+    "text": "sosDescription",
+    "sources": [
+      "components\\sos-interface.tsx"
+    ]
+  },
+  "emergency_medicalemergency": {
+    "text": "emergency.medicalEmergency",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "emergency_medicalemergencydesc": {
+    "text": "emergency.medicalEmergencyDesc",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "emergency_fireemergency": {
+    "text": "emergency.fireEmergency",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "emergency_fireemergencydesc": {
+    "text": "emergency.fireEmergencyDesc",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "emergency_securityemergency": {
+    "text": "emergency.securityEmergency",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "emergency_securityemergencydesc": {
+    "text": "emergency.securityEmergencyDesc",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "emergency_otheremergency": {
+    "text": "emergency.otherEmergency",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "emergency_otheremergencydesc": {
+    "text": "emergency.otherEmergencyDesc",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "locationerror": {
+    "text": "locationError",
+    "sources": [
+      "components\\sos-interface-v2.tsx",
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "locationerrordesc": {
+    "text": "locationErrorDesc",
+    "sources": [
+      "components\\sos-interface-v2.tsx",
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "sosalertsent": {
+    "text": "sosAlertSent",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "failedtosendsos": {
+    "text": "failedToSendSOS",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "requesttimeout": {
+    "text": "requestTimeout",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "alertcancelled": {
+    "text": "alertCancelled",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "alertcancelleddesc": {
+    "text": "alertCancelledDesc",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "getting_location": {
+    "text": "Getting location...",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "location_detected": {
+    "text": "Location detected:",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "broadcasting_sos_signal": {
+    "text": "Broadcasting SOS Signal",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "auto_escalation_in": {
+    "text": "Auto-escalation in:",
+    "sources": [
+      "components\\sos-interface-v2.tsx"
+    ]
+  },
+  "verified_responders": {
+    "text": "Verified Responders",
+    "sources": [
+      "components\\responder-verification.tsx"
+    ]
+  },
+  "no_responders_available": {
+    "text": "No Responders Available",
+    "sources": [
+      "components\\responder-verification.tsx"
+    ]
+  },
+  "contact_selectedresponder_name": {
+    "text": "Contact {selectedResponder.name}",
+    "sources": [
+      "components\\responder-verification.tsx"
+    ]
+  },
+  "active_alerts_subscription": {
+    "text": "Active Alerts Subscription",
+    "sources": [
+      "components\\realtime-test-panel.tsx"
+    ]
+  },
+  "chat_messages_subscription": {
+    "text": "Chat Messages Subscription",
+    "sources": [
+      "components\\realtime-test-panel.tsx"
+    ]
+  },
+  "real_time_notifications": {
+    "text": "Real-time Notifications",
+    "sources": [
+      "components\\realtime-test-panel.tsx"
+    ]
+  },
+  "responder_locations": {
+    "text": "Responder Locations",
+    "sources": [
+      "components\\realtime-test-panel.tsx"
+    ]
+  },
+  "push_notifications": {
+    "text": "Push Notifications",
+    "sources": [
+      "components\\realtime-test-panel.tsx"
+    ]
+  },
+  "realtime_features_test": {
+    "text": "Realtime Features Test",
+    "sources": [
+      "components\\realtime-test-panel.tsx"
+    ]
+  },
+  "last_tested_result_timestamp": {
+    "text": "Last tested: {result.timestamp}",
+    "sources": [
+      "components\\realtime-test-panel.tsx"
+    ]
+  },
+  "notifications": {
+    "text": "Notifications",
+    "sources": [
+      "components\\real-time-notifications.tsx"
+    ]
+  },
+  "no_notifications_yet": {
+    "text": "No notifications yet",
+    "sources": [
+      "components\\real-time-notifications.tsx"
+    ]
+  },
+  "installapp": {
+    "text": "installApp",
+    "sources": [
+      "components\\pwa-install-prompt.tsx"
+    ]
+  },
+  "nearby_responders": {
+    "text": "Nearby Responders",
+    "sources": [
+      "components\\nearby-responders.tsx"
+    ]
+  },
+  "verified_emergency_services_in_your_area": {
+    "text": "Verified emergency services in your area",
+    "sources": [
+      "components\\nearby-responders.tsx"
+    ]
+  },
+  "loading_nearby_responders": {
+    "text": "Loading nearby responders...",
+    "sources": [
+      "components\\nearby-responders.tsx"
+    ]
+  },
+  "all": {
+    "text": "all",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "clinics": {
+    "text": "clinics",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "pharmacies": {
+    "text": "pharmacies",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "police": {
+    "text": "police",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "firestations": {
+    "text": "fireStations",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "nearbyresources": {
+    "text": "nearbyResources",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "loadingnearbyplaces": {
+    "text": "loadingNearbyPlaces",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "retrylocation": {
+    "text": "retryLocation",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "noplacesfound": {
+    "text": "noPlacesFound",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "noplacesdesc": {
+    "text": "noPlacesDesc",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "refresh": {
+    "text": "refresh",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "foundplaces": {
+    "text": "foundPlaces",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "placesnearby": {
+    "text": "placesNearby",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "website": {
+    "text": "website",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "navigate": {
+    "text": "navigate",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "loading": {
+    "text": "loading",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx",
+      "components\\ui\\spinner.tsx",
+      "components\\dashboard\\recent-activity.tsx"
+    ]
+  },
+  "showingresults": {
+    "text": "showingResults",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "results": {
+    "text": "results",
+    "sources": [
+      "components\\nearby-emergency-resources.tsx"
+    ]
+  },
+  "navigation_dashboard": {
+    "text": "navigation.dashboard",
+    "sources": [
+      "components\\navbar.tsx"
+    ]
+  },
+  "navigation_logout": {
+    "text": "navigation.logout",
+    "sources": [
+      "components\\navbar.tsx"
+    ]
+  },
+  "navigation_login": {
+    "text": "navigation.login",
+    "sources": [
+      "components\\navbar.tsx"
+    ]
+  },
+  "navigation_register": {
+    "text": "navigation.register",
+    "sources": [
+      "components\\navbar.tsx"
+    ]
+  },
+  "emergency_response": {
+    "text": "EMERGENCY RESPONSE",
+    "sources": [
+      "components\\navbar.tsx"
+    ]
+  },
+  "close_menu": {
+    "text": "Close menu",
+    "sources": [
+      "components\\navbar.tsx"
+    ]
+  },
+  "emergency_multilingualassistant": {
+    "text": "emergency.multilingualAssistant",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_assistantdescription": {
+    "text": "emergency.assistantDescription",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_detectedlanguage": {
+    "text": "emergency.detectedLanguage",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_describeemergency": {
+    "text": "emergency.describeEmergency",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_descriptionplaceholder": {
+    "text": "emergency.descriptionPlaceholder",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_translateto": {
+    "text": "emergency.translateTo",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_classifytype": {
+    "text": "emergency.classifyType",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_translatenow": {
+    "text": "emergency.translateNow",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_classification": {
+    "text": "emergency.classification",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_category": {
+    "text": "emergency.category",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_confidence": {
+    "text": "emergency.confidence",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_keywords": {
+    "text": "emergency.keywords",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_translations": {
+    "text": "emergency.translations",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "common_copy": {
+    "text": "common.copy",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_tip": {
+    "text": "emergency.tip",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "emergency_tiptext": {
+    "text": "emergency.tipText",
+    "sources": [
+      "components\\multilingual-emergency-assistant.tsx"
+    ]
+  },
+  "map_content": {
+    "text": "./map-content",
+    "sources": [
+      "components\\map-view.tsx"
+    ]
+  },
+  "count": {
+    "text": "count",
+    "sources": [
+      "components\\map-view.tsx"
+    ]
+  },
+  "id_responder_id_latitude_longitude_last_updated_st": {
+    "text": "id,\n          responder_id,\n          latitude,\n          longitude,\n          last_updated,\n          status,\n          accuracy,\n          responders!inner (\n            id,\n            organization,\n            specializations,\n            verification_status,\n            active,\n            user_id,\n            profiles (\n              email\n            )\n          )",
+    "sources": [
+      "components\\map-view.tsx"
+    ]
+  },
+  "map": {
+    "text": "map",
+    "sources": [
+      "components\\map-view.tsx"
+    ]
+  },
+  "getlocation": {
+    "text": "getLocation",
+    "sources": [
+      "components\\map-view.tsx"
+    ]
+  },
+  "legend": {
+    "text": "Legend",
+    "sources": [
+      "components\\map-view.tsx"
+    ]
+  },
+  "your_location": {
+    "text": "Your Location",
+    "sources": [
+      "components\\map-view.tsx",
+      "components\\map-content.tsx"
+    ]
+  },
+  "react_leaflet": {
+    "text": "react-leaflet",
+    "sources": [
+      "components\\map-content.tsx"
+    ]
+  },
+  "openstreetmap": {
+    "text": "OpenStreetMap",
+    "sources": [
+      "components\\map-content.tsx"
+    ]
+  },
+  "you_are_here": {
+    "text": "You are here",
+    "sources": [
+      "components\\map-content.tsx"
+    ]
+  },
+  "language_detected": {
+    "text": "Language Detected!",
+    "sources": [
+      "components\\language-detection-popup.tsx"
+    ]
+  },
+  "emergency_alerts_in_your_native_language": {
+    "text": "Emergency alerts in your native language",
+    "sources": [
+      "components\\language-detection-popup.tsx"
+    ]
+  },
+  "better_communication_with_responders": {
+    "text": "Better communication with responders",
+    "sources": [
+      "components\\language-detection-popup.tsx"
+    ]
+  },
+  "faster_help_in_emergencies": {
+    "text": "Faster help in emergencies",
+    "sources": [
+      "components\\language-detection-popup.tsx"
+    ]
+  },
+  "howitworks_step1title": {
+    "text": "howItWorks.step1Title",
+    "sources": [
+      "components\\how-it-works.tsx"
+    ]
+  },
+  "howitworks_step1desc": {
+    "text": "howItWorks.step1Desc",
+    "sources": [
+      "components\\how-it-works.tsx"
+    ]
+  },
+  "howitworks_step2title": {
+    "text": "howItWorks.step2Title",
+    "sources": [
+      "components\\how-it-works.tsx"
+    ]
+  },
+  "howitworks_step2desc": {
+    "text": "howItWorks.step2Desc",
+    "sources": [
+      "components\\how-it-works.tsx"
+    ]
+  },
+  "howitworks_step3title": {
+    "text": "howItWorks.step3Title",
+    "sources": [
+      "components\\how-it-works.tsx"
+    ]
+  },
+  "howitworks_step3desc": {
+    "text": "howItWorks.step3Desc",
+    "sources": [
+      "components\\how-it-works.tsx"
+    ]
+  },
+  "howitworks_step4title": {
+    "text": "howItWorks.step4Title",
+    "sources": [
+      "components\\how-it-works.tsx"
+    ]
+  },
+  "howitworks_step4desc": {
+    "text": "howItWorks.step4Desc",
+    "sources": [
+      "components\\how-it-works.tsx"
+    ]
+  },
+  "howitworks_badge": {
+    "text": "howItWorks.badge",
+    "sources": [
+      "components\\how-it-works.tsx"
+    ]
+  },
+  "howitworks_title": {
+    "text": "howItWorks.title",
+    "sources": [
+      "components\\how-it-works.tsx"
+    ]
+  },
+  "howitworks_subtitle": {
+    "text": "howItWorks.subtitle",
+    "sources": [
+      "components\\how-it-works.tsx"
+    ]
+  },
+  "home_emergencyresponsewithoutborders": {
+    "text": "home.emergencyResponseWithoutBorders",
+    "sources": [
+      "components\\hero.tsx"
+    ]
+  },
+  "home_aipoweredplatformdescription": {
+    "text": "home.aiPoweredPlatformDescription",
+    "sources": [
+      "components\\hero.tsx"
+    ]
+  },
+  "registerasresponder": {
+    "text": "registerAsResponder",
+    "sources": [
+      "components\\hero.tsx"
+    ]
+  },
+  "coverage": {
+    "text": "coverage",
+    "sources": [
+      "components\\hero.tsx"
+    ]
+  },
+  "globalimpact_title": {
+    "text": "globalImpact.title",
+    "sources": [
+      "components\\global-impact.tsx"
+    ]
+  },
+  "globalimpact_description": {
+    "text": "globalImpact.description",
+    "sources": [
+      "components\\global-impact.tsx"
+    ]
+  },
+  "globalimpact_verifiedresponders": {
+    "text": "globalImpact.verifiedResponders",
+    "sources": [
+      "components\\global-impact.tsx"
+    ]
+  },
+  "globalimpact_countriescovered": {
+    "text": "globalImpact.countriesCovered",
+    "sources": [
+      "components\\global-impact.tsx"
+    ]
+  },
+  "globalimpact_languagessupported": {
+    "text": "globalImpact.languagesSupported",
+    "sources": [
+      "components\\global-impact.tsx"
+    ]
+  },
+  "globalimpact_alwaysavailable": {
+    "text": "globalImpact.alwaysAvailable",
+    "sources": [
+      "components\\global-impact.tsx"
+    ]
+  },
+  "footer_description": {
+    "text": "footer.description",
+    "sources": [
+      "components\\footer.tsx"
+    ]
+  },
+  "footer_platform": {
+    "text": "footer.platform",
+    "sources": [
+      "components\\footer.tsx"
+    ]
+  },
+  "footer_resources": {
+    "text": "footer.resources",
+    "sources": [
+      "components\\footer.tsx"
+    ]
+  },
+  "footer_copyright": {
+    "text": "footer.copyright",
+    "sources": [
+      "components\\footer.tsx"
+    ]
+  },
+  "lingo_dev": {
+    "text": "Lingo.dev",
+    "sources": [
+      "components\\footer.tsx"
+    ]
+  },
+  "selected_files": {
+    "text": "Selected Files:",
+    "sources": [
+      "components\\file-upload.tsx"
+    ]
+  },
+  "uploaded_files": {
+    "text": "Uploaded Files:",
+    "sources": [
+      "components\\file-upload.tsx"
+    ]
+  },
+  "file_upload": {
+    "text": "File upload",
+    "sources": [
+      "components\\file-upload.tsx"
+    ]
+  },
+  "filetypenotaccepted": {
+    "text": "fileTypeNotAccepted",
+    "sources": [
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "uploadfailed": {
+    "text": "uploadFailed",
+    "sources": [
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "maxfilesexceeded": {
+    "text": "maxFilesExceeded",
+    "sources": [
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "dropfileshere": {
+    "text": "dropFilesHere",
+    "sources": [
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "draganddropfiles": {
+    "text": "dragAndDropFiles",
+    "sources": [
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "orclicktobrowse": {
+    "text": "orClickToBrowse",
+    "sources": [
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "acceptedtypes": {
+    "text": "acceptedTypes",
+    "sources": [
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "maxfiles": {
+    "text": "maxFiles",
+    "sources": [
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "uploadedfiles": {
+    "text": "uploadedFiles",
+    "sources": [
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "uploaded": {
+    "text": "uploaded",
+    "sources": [
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "retry": {
+    "text": "retry",
+    "sources": [
+      "components\\file-upload-v2.tsx"
+    ]
+  },
+  "features_aitranslation": {
+    "text": "features.aiTranslation",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_aitranslationdescription": {
+    "text": "features.aiTranslationDescription",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_smartlocation": {
+    "text": "features.smartLocation",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_smartlocationdescription": {
+    "text": "features.smartLocationDescription",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_realtimealerts": {
+    "text": "features.realTimeAlerts",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_realtimealertsdescription": {
+    "text": "features.realTimeAlertsDescription",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_verifiednetwork": {
+    "text": "features.verifiedNetwork",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_verifiednetworkdescription": {
+    "text": "features.verifiedNetworkDescription",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_responderdashboard": {
+    "text": "features.responderDashboard",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_responderdashboarddescription": {
+    "text": "features.responderDashboardDescription",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_globalcoverage": {
+    "text": "features.globalCoverage",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_globalcoveragedescription": {
+    "text": "features.globalCoverageDescription",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_title": {
+    "text": "features.title",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "features_description": {
+    "text": "features.description",
+    "sources": [
+      "components\\features.tsx"
+    ]
+  },
+  "database_tables_test": {
+    "text": "Database Tables Test",
+    "sources": [
+      "components\\database-test-panel.tsx"
+    ]
+  },
+  "setup_required": {
+    "text": "Setup Required:",
+    "sources": [
+      "components\\database-test-panel.tsx"
+    ]
+  },
+  "translated": {
+    "text": "translated",
+    "sources": [
+      "components\\chat-interface.tsx"
+    ]
+  },
+  "typeyourmessage": {
+    "text": "typeYourMessage",
+    "sources": [
+      "components\\chat-interface.tsx"
+    ]
+  },
+  "emergency_response_team": {
+    "text": "Emergency Response Team",
+    "sources": [
+      "components\\chat-interface.tsx"
+    ]
+  },
+  "active_responding": {
+    "text": "Active · Responding",
+    "sources": [
+      "components\\chat-interface.tsx"
+    ]
+  },
+  "loading_messages": {
+    "text": "Loading messages...",
+    "sources": [
+      "components\\chat-interface.tsx"
+    ]
+  },
+  "no_messages_yet_start_the_conversation": {
+    "text": "No messages yet. Start the conversation.",
+    "sources": [
+      "components\\chat-interface.tsx"
+    ]
+  },
+  "messages_auto_translate_to_responder_s_language": {
+    "text": "Messages auto-translate to responder's language",
+    "sources": [
+      "components\\chat-interface.tsx"
+    ]
+  },
+  "you_re_a_responder": {
+    "text": "You're a Responder!",
+    "sources": [
+      "components\\become-responder.tsx"
+    ]
+  },
+  "become_a_responder": {
+    "text": "Become a Responder",
+    "sources": [
+      "components\\become-responder.tsx"
+    ]
+  },
+  "organization_name": {
+    "text": "Organization / Name",
+    "sources": [
+      "components\\become-responder.tsx"
+    ]
+  },
+  "specializations": {
+    "text": "Specializations",
+    "sources": [
+      "components\\become-responder.tsx"
+    ]
+  },
+  "response_radius_km": {
+    "text": "Response Radius (km)",
+    "sources": [
+      "components\\become-responder.tsx"
+    ]
+  },
+  "location_tracking": {
+    "text": "Location Tracking",
+    "sources": [
+      "components\\become-responder.tsx"
+    ]
+  },
+  "e_g_city_hospital_fire_dept_volunteer": {
+    "text": "e.g., City Hospital, Fire Dept, Volunteer",
+    "sources": [
+      "components\\become-responder.tsx"
+    ]
+  },
+  "active_alerts": {
+    "text": "Active Alerts",
+    "sources": [
+      "components\\active-alerts.tsx"
+    ]
+  },
+  "real_time_emergency_alerts_in_your_area": {
+    "text": "Real-time emergency alerts in your area",
+    "sources": [
+      "components\\active-alerts.tsx"
+    ]
+  },
+  "no_active_alerts_in_your_area": {
+    "text": "No active alerts in your area",
+    "sources": [
+      "components\\active-alerts.tsx"
+    ]
+  },
+  "user_id_alert_user_id_slice_0_8": {
+    "text": "User ID: {alert.user_id.slice(0, 8)}...",
+    "sources": [
+      "components\\active-alerts.tsx"
+    ]
+  },
+  "showing_alerts_within_10km_radius": {
+    "text": "Showing alerts within 10km radius",
+    "sources": [
+      "components\\active-alerts.tsx"
+    ]
+  },
+  "sidebar": {
+    "text": "Sidebar",
+    "sources": [
+      "components\\ui\\sidebar.tsx"
+    ]
+  },
+  "displays_the_mobile_sidebar": {
+    "text": "Displays the mobile sidebar.",
+    "sources": [
+      "components\\ui\\sidebar.tsx"
+    ]
+  },
+  "toggle_sidebar": {
+    "text": "Toggle Sidebar",
+    "sources": [
+      "components\\ui\\sidebar.tsx"
+    ]
+  },
+  "close": {
+    "text": "Close",
+    "sources": [
+      "components\\ui\\sheet.tsx",
+      "components\\ui\\dialog.tsx"
+    ]
+  },
+  "previous": {
+    "text": "Previous",
+    "sources": [
+      "components\\ui\\pagination.tsx"
+    ]
+  },
+  "next": {
+    "text": "Next",
+    "sources": [
+      "components\\ui\\pagination.tsx"
+    ]
+  },
+  "more_pages": {
+    "text": "More pages",
+    "sources": [
+      "components\\ui\\pagination.tsx"
+    ]
+  },
+  "pagination": {
+    "text": "pagination",
+    "sources": [
+      "components\\ui\\pagination.tsx"
+    ]
+  },
+  "go_to_previous_page": {
+    "text": "Go to previous page",
+    "sources": [
+      "components\\ui\\pagination.tsx"
+    ]
+  },
+  "go_to_next_page": {
+    "text": "Go to next page",
+    "sources": [
+      "components\\ui\\pagination.tsx"
+    ]
+  },
+  "button": {
+    "text": "button",
+    "sources": [
+      "components\\ui\\input-group.tsx"
+    ]
+  },
+  "previous_slide": {
+    "text": "Previous slide",
+    "sources": [
+      "components\\ui\\carousel.tsx"
+    ]
+  },
+  "next_slide": {
+    "text": "Next slide",
+    "sources": [
+      "components\\ui\\carousel.tsx"
+    ]
+  },
+  "more": {
+    "text": "More",
+    "sources": [
+      "components\\ui\\breadcrumb.tsx"
+    ]
+  },
+  "breadcrumb": {
+    "text": "breadcrumb",
+    "sources": [
+      "components\\ui\\breadcrumb.tsx"
+    ]
+  },
+  "response_time_analytics": {
+    "text": "Response Time Analytics",
+    "sources": [
+      "components\\dashboard\\response-time-analytics.tsx"
+    ]
+  },
+  "average_response_time_by_type": {
+    "text": "Average Response Time by Type",
+    "sources": [
+      "components\\dashboard\\response-time-analytics.tsx"
+    ]
+  },
+  "performance_summary": {
+    "text": "Performance Summary",
+    "sources": [
+      "components\\dashboard\\response-time-analytics.tsx"
+    ]
+  },
+  "overall_average": {
+    "text": "Overall Average",
+    "sources": [
+      "components\\dashboard\\response-time-analytics.tsx"
+    ]
+  },
+  "across_all_emergency_types": {
+    "text": "Across all emergency types",
+    "sources": [
+      "components\\dashboard\\response-time-analytics.tsx"
+    ]
+  },
+  "total_resolved": {
+    "text": "Total Resolved",
+    "sources": [
+      "components\\dashboard\\response-time-analytics.tsx"
+    ]
+  },
+  "successfully_responded_alerts": {
+    "text": "Successfully responded alerts",
+    "sources": [
+      "components\\dashboard\\response-time-analytics.tsx"
+    ]
+  },
+  "id_name_type_active_status": {
+    "text": "id, name, type, active, status",
+    "sources": [
+      "components\\dashboard\\responder-status.tsx"
+    ]
+  },
+  "team_status": {
+    "text": "Team Status",
+    "sources": [
+      "components\\dashboard\\responder-status.tsx"
+    ]
+  },
+  "loading_team_status": {
+    "text": "Loading team status...",
+    "sources": [
+      "components\\dashboard\\responder-status.tsx"
+    ]
+  },
+  "recentactivity": {
+    "text": "recentActivity",
+    "sources": [
+      "components\\dashboard\\recent-activity.tsx"
+    ]
+  },
+  "norecentactivity": {
+    "text": "noRecentActivity",
+    "sources": [
+      "components\\dashboard\\recent-activity.tsx"
+    ]
+  },
+  "responder_dashboard": {
+    "text": "Responder Dashboard",
+    "sources": [
+      "components\\dashboard\\header.tsx"
+    ]
+  },
+  "geographic_alert_distribution": {
+    "text": "Geographic Alert Distribution",
+    "sources": [
+      "components\\dashboard\\geographic-analytics.tsx"
+    ]
+  },
+  "total_alerts": {
+    "text": "Total Alerts",
+    "sources": [
+      "components\\dashboard\\geographic-analytics.tsx"
+    ]
+  },
+  "with_location": {
+    "text": "With Location",
+    "sources": [
+      "components\\dashboard\\geographic-analytics.tsx"
+    ]
+  },
+  "urban_areas": {
+    "text": "Urban Areas",
+    "sources": [
+      "components\\dashboard\\geographic-analytics.tsx"
+    ]
+  },
+  "rural_areas": {
+    "text": "Rural Areas",
+    "sources": [
+      "components\\dashboard\\geographic-analytics.tsx"
+    ]
+  },
+  "recent_alerts": {
+    "text": "Recent Alerts",
+    "sources": [
+      "components\\dashboard\\alerts-table.tsx"
+    ]
+  },
+  "real_time_emergency_alerts_requiring_attention": {
+    "text": "Real-time emergency alerts requiring attention",
+    "sources": [
+      "components\\dashboard\\alerts-table.tsx"
+    ]
+  },
+  "view_all": {
+    "text": "View All",
+    "sources": [
+      "components\\dashboard\\alerts-table.tsx"
+    ]
+  },
+  "alert_id": {
+    "text": "Alert ID",
+    "sources": [
+      "components\\dashboard\\alerts-table.tsx"
+    ]
+  },
+  "type": {
+    "text": "Type",
+    "sources": [
+      "components\\dashboard\\alerts-table.tsx"
+    ]
+  },
+  "priority": {
+    "text": "Priority",
+    "sources": [
+      "components\\dashboard\\alerts-table.tsx"
+    ]
+  },
+  "responder": {
+    "text": "Responder",
+    "sources": [
+      "components\\dashboard\\alerts-table.tsx"
+    ]
+  },
+  "actions": {
+    "text": "Actions",
+    "sources": [
+      "components\\dashboard\\alerts-table.tsx"
+    ]
+  },
+  "alert_trends_7_days": {
+    "text": "Alert Trends (7 Days)",
+    "sources": [
+      "components\\dashboard\\alert-trends-chart.tsx"
+    ]
+  },
+  "total": {
+    "text": "Total",
+    "sources": [
+      "components\\dashboard\\alert-trends-chart.tsx"
+    ]
+  },
+  "medical": {
+    "text": "Medical",
+    "sources": [
+      "components\\dashboard\\alert-trends-chart.tsx"
+    ]
+  },
+  "fire": {
+    "text": "Fire",
+    "sources": [
+      "components\\dashboard\\alert-trends-chart.tsx"
+    ]
+  },
+  "security": {
+    "text": "Security",
+    "sources": [
+      "components\\dashboard\\alert-trends-chart.tsx"
+    ]
+  },
+  "activity_heatmap": {
+    "text": "Activity Heatmap",
+    "sources": [
+      "components\\dashboard\\activity-map.tsx"
+    ]
+  },
+  "active": {
+    "text": "Active",
+    "sources": [
+      "components\\dashboard\\activity-map.tsx"
+    ]
+  },
+  "responding": {
+    "text": "Responding",
+    "sources": [
+      "components\\dashboard\\activity-map.tsx"
+    ]
+  },
+  "resolved": {
+    "text": "Resolved",
+    "sources": [
+      "components\\dashboard\\activity-map.tsx"
+    ]
+  },
+  "hospital_medical_center": {
+    "text": "Hospital / Medical Center",
+    "sources": [
+      "components\\auth\\register-form.tsx"
+    ]
+  },
+  "ngo_relief_organization": {
+    "text": "NGO / Relief Organization",
+    "sources": [
+      "components\\auth\\register-form.tsx"
+    ]
+  },
+  "volunteer_responder": {
+    "text": "Volunteer Responder",
+    "sources": [
+      "components\\auth\\register-form.tsx"
+    ]
+  },
+  "fire_department": {
+    "text": "Fire Department",
+    "sources": [
+      "components\\auth\\register-form.tsx"
+    ]
+  },
+  "police_security": {
+    "text": "Police / Security",
+    "sources": [
+      "components\\auth\\register-form.tsx"
+    ]
+  },
+  "john_doe": {
+    "text": "John Doe",
+    "sources": [
+      "components\\auth\\register-form.tsx"
+    ]
+  },
+  "responder_example_com": {
+    "text": "responder@example.com",
+    "sources": [
+      "components\\auth\\register-form.tsx"
+    ]
+  },
+  "red_cross_city_hospital_etc": {
+    "text": "Red Cross, City Hospital, etc.",
+    "sources": [
+      "components\\auth\\register-form.tsx"
+    ]
+  },
+  "select_your_role": {
+    "text": "Select your role",
+    "sources": [
+      "components\\auth\\register-form.tsx"
+    ]
+  },
+  "successfullysignedin": {
+    "text": "successfullySignedIn",
+    "sources": [
+      "components\\auth\\login-form.tsx"
+    ]
+  },
+  "failedtosignin": {
+    "text": "failedToSignIn",
+    "sources": [
+      "components\\auth\\login-form.tsx"
+    ]
+  },
+  "status_responders": {
+    "text": "status, responders",
+    "sources": [
+      "lib\\sos-system.ts"
+    ]
+  },
+  "id_user_id_profiles_user_id_name_organization": {
+    "text": "id,\n        user_id,\n        profiles:user_id (\n          name,\n          organization\n        )",
+    "sources": [
+      "lib\\sos-system.ts"
+    ]
+  }
+}

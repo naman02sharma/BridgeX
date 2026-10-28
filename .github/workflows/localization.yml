@@ -1,0 +1,37 @@
+name: Localization Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  localization-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Lingo.dev CLI
+        run: |
+          npm install -g @lingo/dev
+          lingo config --api-key ${{ secrets.LINGO_API_KEY }}
+
+      - name: Run localization sync
+        run: lingo sync
+
+      - name: Run localization tests
+        run: npm run test:localization
+
+      - name: Check translation coverage
+        run: lingo check-coverage --min-coverage 80

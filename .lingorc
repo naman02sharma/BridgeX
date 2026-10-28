@@ -1,0 +1,35 @@
+{
+  "locales": [
+    "en", "es", "fr", "ru", "de", "ja", "zh", "ar", "ko"
+  ],
+  "defaultLocale": "en",
+  "fallbackLocale": "en",
+  "apiKey": "${LINGO_API_KEY}",
+  "sourceDir": "./i18n/extracted",
+  "outputDir": "./i18n/locales",
+  "format": "json",
+  "cache": {
+    "enabled": true,
+    "ttl": 3600000,
+    "maxSize": 1000
+  },
+  "nlp": {
+    "intentClasses": ["fire", "medical", "disaster", "security", "general"],
+    "enabled": true
+  },
+  "optimization": {
+    "batchSize": 50,
+    "retryAttempts": 3,
+    "timeout": 10000
+  },
+  "emergency": {
+    "priorityKeys": [
+      "sos", "sendAlert", "emergency", "help", "fire", "medical",
+      "police", "disaster", "location", "cancel"
+    ]
+  },
+  "rtl": {
+    "locales": ["ar"],
+    "enabled": true
+  }
+}

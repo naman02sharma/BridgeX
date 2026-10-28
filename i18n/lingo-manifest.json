@@ -1,0 +1,22 @@
+{
+  "sourceLocale": "en",
+  "locales": [
+    "es",
+    "fr",
+    "ru",
+    "de",
+    "ja",
+    "zh",
+    "ar",
+    "ko"
+  ],
+  "sourceFile": "public/i18n/locales/en.json",
+  "outputPattern": "public/i18n/locales/{locale}.json",
+  "namespace": "common",
+  "context": "emergency_response",
+  "glossary": {
+    "BridgeX": "BridgeX",
+    "SOS": "SOS",
+    "Responder": "Responder"
+  }
+}
