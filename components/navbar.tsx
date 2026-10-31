@@ -21,6 +21,7 @@ export function Navbar() {
   const { user, loading } = useSupabase()
   const { t } = useGlobalTranslation()
   const router = useRouter()
+  const isResponder = !!user && user.role !== "user" && user.role !== "victim"
 
   useEffect(() => {
     const handleScroll = () => {
@@ -110,10 +111,18 @@ export function Navbar() {
                       <span className="hidden xl:inline text-xs font-semibold max-w-[100px] truncate">{user.name || user.email}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => router.push("/dashboard")}>
-                      {t('navigation.dashboard')}
-                    </DropdownMenuItem>
+                  <DropdownMenuContent align="end" className="w-52">
+                    <div className="px-2 py-1.5 text-xs border-b mb-1">
+                      <div className="font-semibold text-foreground truncate">{user.name || user.email}</div>
+                      <div className="text-[10px] text-muted-foreground capitalize">
+                        {isResponder ? `${user.role} Responder` : "Citizen / SOS User"}
+                      </div>
+                    </div>
+                    {isResponder && (
+                      <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+                        {t('navigation.dashboard', 'Responder Dashboard')}
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="w-4 h-4 mr-2" />
                       {t('navigation.logout')}
@@ -224,16 +233,18 @@ export function Navbar() {
                       <div className="text-center text-sm text-muted-foreground">
                         Signed in as {user.name || user.email}
                       </div>
-                      <Button
-                        variant="outline"
-                        className="w-full font-medium"
-                        onClick={() => {
-                          setIsMobileMenuOpen(false)
-                          router.push("/dashboard")
-                        }}
-                      >
-                        {t('navigation.dashboard')}
-                      </Button>
+                      {isResponder && (
+                        <Button
+                          variant="outline"
+                          className="w-full font-medium"
+                          onClick={() => {
+                            setIsMobileMenuOpen(false)
+                            router.push("/dashboard")
+                          }}
+                        >
+                          {t('navigation.dashboard', 'Responder Dashboard')}
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         className="w-full font-medium"

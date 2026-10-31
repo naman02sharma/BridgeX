@@ -2,8 +2,9 @@
 
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
+import { Suspense } from "react"
 import { LoginForm } from "@/components/auth/login-form"
-import { Globe } from "lucide-react"
+import { Globe, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useGlobalTranslation } from "@/components/translation-provider"
 
@@ -27,7 +28,9 @@ export default function LoginPage() {
             <p className="text-muted-foreground">{t('auth.signInToDashboard')}</p>
           </div>
 
-          <LoginForm />
+          <Suspense fallback={<div className="h-64 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}>
+            <LoginForm />
+          </Suspense>
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {t('auth.dontHaveAccount')}{" "}

@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Mail, Lock, User, Building2, Phone, Loader2 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { signUp } from "@/lib/auth"
 import { useGlobalTranslation } from "@/components/translation-provider"
@@ -27,7 +26,6 @@ export function RegisterForm() {
     phone: "",
   })
   const [loading, setLoading] = useState(false)
-  const [showConfirmation, setShowConfirmation] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,7 +52,7 @@ export function RegisterForm() {
     }
 
     try {
-      await signUp(formData.email, formData.password, {
+      const data = await signUp(formData.email, formData.password, {
         name: formData.name,
         role: formData.role as any,
         phone: formData.phone,
@@ -64,9 +62,21 @@ export function RegisterForm() {
       if (typeof window !== "undefined") {
         localStorage.setItem("bridgex_user_phone", formData.phone)
         localStorage.setItem("bridgex_user_name", formData.name)
+        localStorage.setItem("bridgex_user_role", formData.role)
       }
 
-      setShowConfirmation(true)
+      toast.success(
+        isCitizen
+          ? "Account created successfully! Welcome to BridgeX."
+          : "Responder account registered successfully!"
+      )
+
+      // Direct redirection - NO email verification popup
+      if (data?.session) {
+        router.push(isCitizen ? "/" : "/dashboard")
+      } else {
+        router.push(`/auth/login?email=${encodeURIComponent(formData.email)}`)
+      }
     } catch (error: any) {
       console.error("Registration error:", error)
       toast.error(error.message || "Failed to create account")
@@ -233,33 +243,6 @@ export function RegisterForm() {
           </Button>
         </form>
       </Card>
-
-      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Mail className="w-5 h-5 text-primary" />
-              Check Your Email
-            </DialogTitle>
-            <div className="text-center space-y-3 text-sm text-muted-foreground">
-              <div>
-                We've sent a confirmation link to <strong className="text-foreground">{formData.email}</strong>
-              </div>
-              <div>
-                Click the link in the email to verify your account and complete your registration.
-              </div>
-              <div className="text-xs">
-                Didn't receive the email? Check your spam folder or contact support.
-              </div>
-            </div>
-          </DialogHeader>
-          <div className="flex justify-center">
-            <Button onClick={() => router.push("/auth/login")} className="w-full">
-              Continue to Login
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   )
 }
