@@ -478,7 +478,11 @@ export function SOSInterfaceV2() {
       }
 
       const result = await response.json()
-      setAlertId(result.alert?.id || null)
+      const newAlertId = result.alert?.id || null
+      setAlertId(newAlertId)
+      if (typeof window !== "undefined" && newAlertId) {
+        localStorage.setItem("bridgex_active_sos_id", newAlertId)
+      }
       setGuestId(isGuest ? userId : null)
       setNotifiedCount(typeof result.dispatch?.notified === "number" ? result.dispatch.notified : null)
       setAcceptedBy(null)
@@ -559,6 +563,9 @@ export function SOSInterfaceV2() {
     setNotifiedCount(null)
     setAcceptedBy(null)
     setGuestId(null)
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("bridgex_active_sos_id")
+    }
     setResetSignal((k) => k + 1)
   }
 

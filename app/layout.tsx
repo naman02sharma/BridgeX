@@ -12,10 +12,7 @@ import { I18nProvider } from "@/i18n/provider"
 import { LanguageDetectionPopup } from "@/components/language-detection-popup"
 import { Toaster } from "sonner"
 
-import { Inter, JetBrains_Mono, Geist_Mono as BridgeX_Font_Geist_Mono } from 'next/font/google'
-
-// Initialize fonts
-const _geistMono = BridgeX_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
+import { Inter, JetBrains_Mono } from 'next/font/google'
 
 const inter = Inter({
   subsets: ["latin"],

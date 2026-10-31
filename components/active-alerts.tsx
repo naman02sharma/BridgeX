@@ -41,6 +41,8 @@ import {
 } from "@/components/ui/dialog"
 import { motion, AnimatePresence } from "framer-motion"
 import { fetchNearbyPlaces, type NearbyPlace, formatDistance } from "@/lib/geolocation-service"
+import { FirstAidGuide } from "@/components/first-aid-guide"
+import { EmergencyBeacon } from "@/components/emergency-beacon"
 
 interface Alert {
   id: string
@@ -164,7 +166,9 @@ export function ActiveAlerts() {
   })
 
   const userRole = (user as any)?.role || "user"
-  const isVictimUser = userRole === "victim" || userRole === "user"
+  const isResponder = Boolean(user && userRole !== "user" && userRole !== "victim")
+  const isVictimUser = !isResponder
+  const userPhone = (user as any)?.phone || (user as any)?.user_metadata?.phone || ""
 
   // Responder specialization (fire / medical / security / all)
   const userSpecialization = (user as any)?.specialization || (user as any)?.organization_type || userRole
@@ -192,14 +196,23 @@ export function ActiveAlerts() {
     }
   }, [user])
 
-  // Computed visible alerts filtered by declined IDs and department specialization
+  // Computed visible alerts filtered by declined IDs, stale filter, and department specialization
   const visibleAlerts = alerts.filter((a) => {
-    // 1. Never show if rejected / declined by this user
+    // 1. If citizen/victim: ONLY show their OWN alert! Never show other users' emergencies
+    if (isVictimUser) {
+      return (user && a.user_id === user.id) || (userPhone && a.metadata?.victim_phone === userPhone)
+    }
+
+    // 2. Never show if rejected / declined by this responder
     if (declinedAlertIds.includes(a.id) || declinedAlertIdsRef.current.has(a.id)) {
       return false
     }
 
-    // 2. Department matching:
+    // 3. Stale check: don't show unaccepted alerts older than 24h
+    const ageHours = (Date.now() - new Date(a.created_at).getTime()) / (1000 * 60 * 60)
+    if (ageHours > 24 && !a.accepted_by) return false
+
+    // 4. Department matching:
     // If responder has medical specialization, "accident" and "medical" are both medical emergencies
     if (departmentFilter === "medical") {
       if (a.emergency_type !== "medical" && a.emergency_type !== "accident") return false
@@ -255,19 +268,31 @@ export function ActiveAlerts() {
 
   const handleResolveAlert = async (alertId: string) => {
     try {
-      await authFetch(`/api/alerts/${alertId}`, {
-        method: "PATCH",
-        body: JSON.stringify({ action: "resolve" }),
-      })
+      try {
+        await authFetch(`/api/alerts/${alertId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ action: "resolve" }),
+        })
+      } catch {}
+
+      // Direct client fallback to ensure row status is updated in database
+      try {
+        await supabase
+          .from("alerts")
+          .update({ status: "resolved", updated_at: new Date().toISOString() })
+          .eq("id", alertId)
+      } catch {}
+
       setAlerts((prev) => prev.filter((a) => a.id !== alertId))
       const nextAccepted = myAcceptedAlertIds.filter((id) => id !== alertId)
       setMyAcceptedAlertIds(nextAccepted)
       try {
         localStorage.setItem("bridgex_accepted_alert_ids", JSON.stringify(nextAccepted))
+        localStorage.removeItem("bridgex_active_sos_id")
       } catch {}
       toast({
-        title: "Incident Resolved",
-        description: "The emergency has been marked as resolved.",
+        title: "Emergency Resolved",
+        description: "The emergency has been marked as resolved and cancelled.",
       })
     } catch {
       toast({
@@ -316,6 +341,18 @@ export function ActiveAlerts() {
 
           if (payload.eventType === "INSERT") {
             const newAlert = payload.new as Alert
+
+            // CITIZENS / VICTIMS: ONLY receive updates about their own SOS!
+            if (isVictimUser) {
+              const isMine =
+                (user && newAlert.user_id === user.id) ||
+                (userPhone && newAlert.metadata?.victim_phone === userPhone)
+              if (isMine) {
+                setAlerts((prev) => [newAlert, ...prev.filter((a) => a.id !== newAlert.id)])
+              }
+              return
+            }
+
             if (decSet.has(newAlert.id)) return // Never show declined alerts
             if (newAlert.accepted_by) {
               const isMine = (user && newAlert.accepted_by === user.id) || accSet.has(newAlert.id)
@@ -327,6 +364,20 @@ export function ActiveAlerts() {
             }
           } else if (payload.eventType === "UPDATE") {
             const updatedAlert = payload.new as Alert
+            if (isVictimUser) {
+              if (updatedAlert.status === "resolved" || updatedAlert.status === "cancelled") {
+                setAlerts((prev) => prev.filter((a) => a.id !== updatedAlert.id))
+              } else {
+                const isMine =
+                  (user && updatedAlert.user_id === user.id) ||
+                  (userPhone && updatedAlert.metadata?.victim_phone === userPhone)
+                if (isMine) {
+                  setAlerts((prev) => [updatedAlert, ...prev.filter((a) => a.id !== updatedAlert.id)])
+                }
+              }
+              return
+            }
+
             if (decSet.has(updatedAlert.id)) {
               // Ensure rejected alert is completely excluded
               setAlerts((prev) => prev.filter((a) => a.id !== updatedAlert.id))
@@ -378,10 +429,29 @@ export function ActiveAlerts() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user?.id])
+  }, [user?.id, isVictimUser, userPhone])
 
   const fetchAlerts = async () => {
     try {
+      if (isVictimUser) {
+        // Citizens / Victims: ONLY fetch their OWN active SOS
+        if (!user?.id) {
+          setAlerts([])
+          return
+        }
+        const { data, error } = await supabase
+          .from("alerts")
+          .select("*, profiles:user_id(name, phone)")
+          .eq("user_id", user.id)
+          .in("status", ["active", "responding"])
+          .order("created_at", { ascending: false })
+          .limit(5)
+
+        setAlerts(data || [])
+        return
+      }
+
+      // Responders: fetch active/responding dispatches
       const { data, error } = await supabase
         .from("alerts")
         .select("*, profiles:user_id(name, phone)")
@@ -421,14 +491,18 @@ export function ActiveAlerts() {
         // 2. If resolved or cancelled -> don't show
         if (a.status === "resolved" || a.status === "cancelled") return false
 
-        // 3. If accepted by someone:
+        // 3. Stale check: filter out unaccepted alerts older than 24 hours
+        const ageHours = (Date.now() - new Date(a.created_at).getTime()) / (1000 * 60 * 60)
+        if (ageHours > 24 && !a.accepted_by) return false
+
+        // 4. If accepted by someone:
         if (a.accepted_by) {
           const isMine = (user && a.accepted_by === user.id) || accSet.has(a.id)
           // Keep ONLY for the one who accepted, remove from everyone else!
           return isMine
         }
 
-        // 4. Otherwise it's unaccepted and active -> show to all responders
+        // 5. Otherwise it's unaccepted and active -> show to all responders
         return a.status === "active"
       })
 
@@ -631,16 +705,248 @@ export function ActiveAlerts() {
       <div className="space-y-4">
         <Card className="p-4 border-2">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-foreground">Active Alerts</h3>
+            <h3 className="font-semibold text-foreground">
+              {isVictimUser ? "Emergency Safety Status" : "Active Emergency Dispatches"}
+            </h3>
             <Badge variant="secondary" className="animate-pulse">
               Loading...
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground">Real-time emergency alerts in your area</p>
+          <p className="text-sm text-muted-foreground">
+            {isVictimUser ? "Connecting to BridgeX emergency grid..." : "Scanning for active emergency dispatches..."}
+          </p>
         </Card>
       </div>
     )
   }
+
+  // ==========================================
+  // CITIZEN / VICTIM USER VIEW (NO OTHER ALERTS)
+  // ==========================================
+  if (isVictimUser) {
+    const myActiveAlert = visibleAlerts.find(
+      (a) => a.status === "active" || a.status === "responding"
+    )
+
+    if (myActiveAlert) {
+      return (
+        <div className="space-y-4">
+          <Card className="p-5 border-2 border-red-500/50 bg-gradient-to-b from-card to-red-950/20 shadow-lg">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-red-600 text-white animate-pulse">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-sm flex items-center gap-1.5">
+                    Your Emergency SOS is Live
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    Dispatched to verified responders & emergency services
+                  </p>
+                </div>
+              </div>
+              <Badge className="bg-red-600 text-white animate-pulse text-xs font-bold capitalize">
+                {myActiveAlert.urgency_level || "Critical"}
+              </Badge>
+            </div>
+
+            {/* Department Routed */}
+            <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-xs font-semibold text-foreground flex items-center justify-between mb-3">
+              <span className="flex items-center gap-1.5 truncate">
+                <Building2 className="w-4 h-4 text-red-500 flex-shrink-0" />
+                Target: {myActiveAlert.metadata?.emergency_department || myActiveAlert.metadata?.routed_organization || "Emergency Rapid Response"}
+              </span>
+              <Badge className="bg-red-600 text-white text-[10px] ml-1 flex-shrink-0">
+                Helpline: {myActiveAlert.metadata?.emergency_helpline || myActiveAlert.metadata?.routed_helpline || "112"}
+              </Badge>
+            </div>
+
+            {/* Live Response Status */}
+            <div className="mb-3">
+              {myActiveAlert.status === "responding" || myActiveAlert.accepted_by ? (
+                <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-xs space-y-1">
+                  <div className="flex items-center gap-2 font-bold text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle className="w-4 h-4" />
+                    Responder En Route!
+                  </div>
+                  <p className="text-muted-foreground text-[11px]">
+                    A verified responder has taken charge of your emergency and is navigating to you.
+                  </p>
+                  {myActiveAlert.responder_phone && (
+                    <a
+                      href={`tel:${myActiveAlert.responder_phone}`}
+                      className="mt-2 inline-flex items-center gap-1.5 py-1 px-3 rounded-lg bg-emerald-600 text-white font-bold text-xs"
+                    >
+                      <Phone className="w-3.5 h-3.5" /> Call Responder: {myActiveAlert.responder_phone}
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 text-xs space-y-1">
+                  <div className="flex items-center gap-2 font-bold text-amber-600 dark:text-amber-400">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Broadcasting Distress Signal...
+                  </div>
+                  <p className="text-muted-foreground text-[11px]">
+                    Your GPS coordinates and emergency details are being dispatched to nearby units.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Landmark & Message */}
+            <div className="space-y-1.5 mb-4 text-xs text-muted-foreground">
+              {(myActiveAlert.location?.details || myActiveAlert.metadata?.address_details) && (
+                <div className="flex items-start gap-1.5 text-foreground bg-muted/60 p-2 rounded-lg">
+                  <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-red-500" />
+                  <span className="font-medium truncate">
+                    {myActiveAlert.location?.details || myActiveAlert.metadata?.address_details}
+                  </span>
+                </div>
+              )}
+              {myActiveAlert.message && (
+                <div className="p-2 rounded-lg bg-muted/40 text-card-foreground text-xs italic">
+                  &ldquo;{myActiveAlert.message}&rdquo;
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href="tel:112"
+                className="py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-center text-xs flex items-center justify-center gap-1.5 shadow-md shadow-red-600/30 transition-all"
+              >
+                <Phone className="w-3.5 h-3.5" /> Call 112 Direct
+              </a>
+              <Button
+                variant="outline"
+                className="text-xs font-bold border-emerald-500 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 h-9"
+                onClick={() => handleResolveAlert(myActiveAlert.id)}
+              >
+                <CheckCircle className="w-3.5 h-3.5 mr-1" />
+                I Am Safe / Cancel
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )
+    }
+
+    // Citizen Safety Hub (When no active alert submitted)
+    return (
+      <div className="space-y-4">
+        <Card className="p-5 border-2 border-emerald-500/30 bg-gradient-to-b from-card to-emerald-950/10 shadow-md">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                <Shield className="w-5 h-5 text-emerald-500" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
+                  Citizen Safety Hub
+                  <Badge className="bg-emerald-600/20 text-emerald-500 border border-emerald-500/30 text-[10px] py-0 px-1.5 font-bold">
+                    All Clear
+                  </Badge>
+                </h3>
+                <p className="text-[11px] text-muted-foreground">
+                  {user ? `Logged in as ${user.name || user.email}` : "24/7 AI-Monitored Emergency Grid"}
+                </p>
+              </div>
+            </div>
+            <Badge variant="outline" className="text-[11px] text-emerald-600 border-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-950/30 font-bold">
+              Protected
+            </Badge>
+          </div>
+
+          <p className="text-xs text-muted-foreground mb-4">
+            You have no active emergency requests. BridgeX AI-powered rapid response grid is active and standing by in your area.
+          </p>
+
+          {/* 1-Tap Emergency Speed Dial */}
+          <div className="space-y-2 mb-4">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+              Direct Emergency Helplines (1-Tap Dial)
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href="tel:112"
+                className="p-2.5 rounded-xl border bg-card hover:bg-muted/70 transition-all flex items-center gap-2 text-xs font-bold text-foreground group"
+              >
+                <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600">
+                  <Shield className="w-3.5 h-3.5" />
+                </div>
+                <div className="truncate">
+                  <span className="block text-[10px] text-muted-foreground font-normal">National Helpline</span>
+                  <span>112 Emergency</span>
+                </div>
+              </a>
+              <a
+                href="tel:108"
+                className="p-2.5 rounded-xl border bg-card hover:bg-muted/70 transition-all flex items-center gap-2 text-xs font-bold text-foreground group"
+              >
+                <div className="p-1.5 rounded-lg bg-red-500/10 text-red-600">
+                  <Heart className="w-3.5 h-3.5" />
+                </div>
+                <div className="truncate">
+                  <span className="block text-[10px] text-muted-foreground font-normal">Ambulance</span>
+                  <span>108 / 102 Medical</span>
+                </div>
+              </a>
+              <a
+                href="tel:101"
+                className="p-2.5 rounded-xl border bg-card hover:bg-muted/70 transition-all flex items-center gap-2 text-xs font-bold text-foreground group"
+              >
+                <div className="p-1.5 rounded-lg bg-orange-500/10 text-orange-600">
+                  <Flame className="w-3.5 h-3.5" />
+                </div>
+                <div className="truncate">
+                  <span className="block text-[10px] text-muted-foreground font-normal">Fire & Rescue</span>
+                  <span>101 Fire Dept</span>
+                </div>
+              </a>
+              <a
+                href="tel:100"
+                className="p-2.5 rounded-xl border bg-card hover:bg-muted/70 transition-all flex items-center gap-2 text-xs font-bold text-foreground group"
+              >
+                <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600">
+                  <Phone className="w-3.5 h-3.5" />
+                </div>
+                <div className="truncate">
+                  <span className="block text-[10px] text-muted-foreground font-normal">Police</span>
+                  <span>100 Control</span>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="space-y-2 pt-2 border-t">
+            <Button
+              className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-bold text-xs h-9 gap-2 shadow-md shadow-red-600/20"
+              onClick={() => {
+                const el = document.getElementById("sos-interface")
+                if (el) el.scrollIntoView({ behavior: "smooth" })
+              }}
+            >
+              <AlertTriangle className="w-4 h-4" />
+              Trigger Emergency SOS
+            </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <FirstAidGuide size="sm" variant="outline" triggerClassName="w-full text-xs h-8" label="First Aid Guide" />
+              <EmergencyBeacon size="sm" variant="outline" triggerClassName="w-full text-xs h-8" label="Beacon & Siren" />
+            </div>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  // ==========================================
+  // RESPONDER VIEW (LIVE DISPATCH CONSOLE)
+  // ==========================================
 
   return (
     <div className="space-y-4">
