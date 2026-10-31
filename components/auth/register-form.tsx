@@ -46,12 +46,19 @@ export function RegisterForm() {
       return
     }
 
+    const isCitizen = formData.role === "user" || formData.role === "victim"
+    if (!isCitizen && (!formData.organization || formData.organization.trim().length === 0)) {
+      toast.error("Please enter your organization or agency name")
+      setLoading(false)
+      return
+    }
+
     try {
       await signUp(formData.email, formData.password, {
         name: formData.name,
         role: formData.role as any,
         phone: formData.phone,
-        organization: formData.organization,
+        organization: isCitizen ? undefined : formData.organization,
       })
 
       if (typeof window !== "undefined") {
@@ -109,24 +116,6 @@ export function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="organization" className="text-foreground">
-              {t('auth.organization', 'Organization')}
-            </Label>
-            <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                id="organization"
-                type="text"
-                placeholder={t('auth.placeholder.organization', 'Red Cross, City Hospital, etc.')}
-                value={formData.organization}
-                onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                className="pl-10"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="role" className="text-foreground">
               Account Type / Role
             </Label>
@@ -144,6 +133,27 @@ export function RegisterForm() {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Organization: only required and shown for responders (Hospitals, Police, Fire, NGOs, Volunteers) */}
+          {formData.role !== "user" && (
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+              <Label htmlFor="organization" className="text-foreground">
+                {t('auth.organization', 'Organization / Agency Name')} <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input
+                  id="organization"
+                  type="text"
+                  placeholder={t('auth.placeholder.organization', 'Red Cross, City Hospital, Fire Brigade, etc.')}
+                  value={formData.organization}
+                  onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
+                  className="pl-10"
+                  required={formData.role !== "user"}
+                />
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="phone" className="text-foreground flex items-center justify-between">
@@ -204,8 +214,9 @@ export function RegisterForm() {
           </div>
 
           <div className="text-xs text-muted-foreground">
-            By registering, you agree to our Terms of Service and Privacy Policy. All responders must be verified before
-            accessing the platform.
+            {formData.role === "user"
+              ? "By registering, you agree to our Terms of Service and Privacy Policy. Your account enables real-time SOS broadcasts and instant help tracking."
+              : "By registering, you agree to our Terms of Service and Privacy Policy. All responders are verified before receiving emergency dispatch assignments."}
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
@@ -214,8 +225,10 @@ export function RegisterForm() {
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Creating account...
               </>
+            ) : formData.role === "user" ? (
+              "Create Citizen / SOS Account"
             ) : (
-              "Register as Responder"
+              "Register as Verified Responder"
             )}
           </Button>
         </form>
