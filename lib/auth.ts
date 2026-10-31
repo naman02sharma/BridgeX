@@ -1,7 +1,7 @@
 import { createClient } from './supabase'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
-export type UserRole = "user" | "responder" | "admin"
+export type UserRole = "user" | "victim" | "responder" | "hospital" | "fire" | "police" | "volunteer" | "ngo" | "admin" | string
 
 export interface User {
   id: string
@@ -10,6 +10,8 @@ export interface User {
   role: UserRole
   organization?: string
   phone?: string
+  specialization?: string
+  specializations?: string[]
   verified: boolean
   createdAt: Date
 }
@@ -21,15 +23,21 @@ export interface Session {
 }
 
 // Convert Supabase user to our User type
-function convertSupabaseUser(supabaseUser: SupabaseUser, profile?: any): User {
+export function convertSupabaseUser(supabaseUser: SupabaseUser, profile?: any, responder?: any): User {
+  const role = profile?.role || supabaseUser.user_metadata?.role || 'user'
+  const specs = responder?.specializations || (profile?.role && profile.role !== 'user' ? [profile.role] : [])
+  const primarySpec = specs[0] || (role !== 'user' ? role : undefined)
+
   return {
     id: supabaseUser.id,
     email: supabaseUser.email!,
     name: profile?.name || supabaseUser.user_metadata?.name,
-    role: profile?.role || 'user',
-    organization: profile?.organization,
+    role,
+    organization: responder?.organization || profile?.organization || supabaseUser.user_metadata?.organization,
     phone: profile?.phone || supabaseUser.user_metadata?.phone,
-    verified: profile?.verified || false,
+    specialization: primarySpec,
+    specializations: specs,
+    verified: responder ? responder.verification_status === 'verified' : (profile?.verified || false),
     createdAt: new Date(supabaseUser.created_at),
   }
 }

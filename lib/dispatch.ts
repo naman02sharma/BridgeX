@@ -3,10 +3,10 @@ import webpush from "web-push"
 
 /** Which responder specializations can handle which emergency type. */
 export const SPECIALIZATIONS_FOR: Record<string, string[]> = {
-  medical: ["medical", "trauma", "first-aid"],
-  fire: ["fire", "rescue"],
-  accident: ["medical", "trauma", "rescue", "first-aid"],
-  security: ["security", "rescue", "support"],
+  medical: ["medical", "trauma", "first-aid", "hospital", "doctor"],
+  fire: ["fire", "rescue", "firefighter"],
+  accident: ["medical", "trauma", "rescue", "first-aid", "hospital", "doctor"],
+  security: ["security", "rescue", "support", "police"],
   natural_disaster: ["rescue", "fire", "medical", "support"],
   other: ["rescue", "support", "first-aid", "medical", "fire", "trauma", "security"],
 }

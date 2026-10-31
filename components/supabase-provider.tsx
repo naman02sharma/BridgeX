@@ -12,6 +12,8 @@ type SupabaseContext = {
   loading: boolean
 }
 
+import { convertSupabaseUser } from '@/lib/auth'
+
 const Context = createContext<SupabaseContext | undefined>(undefined)
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
@@ -24,20 +26,36 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const loadFullUser = async (rawUser: any) => {
+      if (!rawUser) {
+        setUser(null)
+        setLoading(false)
+        return
+      }
+
+      // First set immediate metadata-based user
+      const immediateUser = convertSupabaseUser(rawUser)
+      setUser(immediateUser)
+
+      // Asynchronously enrich with database profile and responder info
+      try {
+        const [{ data: profile }, { data: responder }] = await Promise.all([
+          supabase.from('profiles').select('*').eq('id', rawUser.id).maybeSingle(),
+          supabase.from('responders').select('*').eq('user_id', rawUser.id).maybeSingle()
+        ])
+        setUser(convertSupabaseUser(rawUser, profile, responder))
+      } catch (err) {
+        console.warn('[SupabaseProvider] Could not enrich user profile:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     // Get initial session
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       setSession(session)
-      setUser(session?.user ? {
-        id: session.user.id,
-        email: session.user.email!,
-        name: session.user.user_metadata?.name,
-        phone: session.user.user_metadata?.phone,
-        role: 'user', // Will be updated from profile
-        verified: false,
-        createdAt: new Date(session.user.created_at),
-      } : null)
-      setLoading(false)
+      await loadFullUser(session?.user)
     }
 
     getInitialSession()
@@ -46,16 +64,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session)
-        setUser(session?.user ? {
-          id: session.user.id,
-          email: session.user.email!,
-          name: session.user.user_metadata?.name,
-          phone: session.user.user_metadata?.phone,
-          role: 'user',
-          verified: false,
-          createdAt: new Date(session.user.created_at),
-        } : null)
-        setLoading(false)
+        await loadFullUser(session?.user)
       }
     )
 

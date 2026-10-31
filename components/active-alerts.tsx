@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -151,6 +151,8 @@ export function ActiveAlerts() {
       return []
     }
   })
+  const declinedAlertIdsRef = useRef<Set<string>>(new Set(declinedAlertIds))
+
   const [myAcceptedAlertIds, setMyAcceptedAlertIds] = useState<string[]>(() => {
     if (typeof window === "undefined") return []
     try {
@@ -176,16 +178,46 @@ export function ActiveAlerts() {
 
   const [departmentFilter, setDepartmentFilter] = useState<string>(defaultDept)
 
+  // Automatically adapt department filter when responder logs in
+  useEffect(() => {
+    if (!user) return
+    const role = (user as any)?.role
+    const spec = (user as any)?.specialization || role
+    if (spec === "hospital" || spec === "medical") {
+      setDepartmentFilter("medical")
+    } else if (spec === "fire") {
+      setDepartmentFilter("fire")
+    } else if (spec === "police" || spec === "security") {
+      setDepartmentFilter("security")
+    }
+  }, [user])
+
+  // Computed visible alerts filtered by declined IDs and department specialization
+  const visibleAlerts = alerts.filter((a) => {
+    // 1. Never show if rejected / declined by this user
+    if (declinedAlertIds.includes(a.id) || declinedAlertIdsRef.current.has(a.id)) {
+      return false
+    }
+
+    // 2. Department matching:
+    // If responder has medical specialization, "accident" and "medical" are both medical emergencies
+    if (departmentFilter === "medical") {
+      if (a.emergency_type !== "medical" && a.emergency_type !== "accident") return false
+    } else if (departmentFilter !== "all") {
+      if (a.emergency_type !== departmentFilter) return false
+    }
+
+    return true
+  })
+
   // Responders only: unaccepted alerts matching department filter, never playing siren for victim's own alert
   const unacceptedAlerts = isVictimUser
     ? []
-    : alerts.filter(
+    : visibleAlerts.filter(
         (a) =>
           a.status === "active" &&
           !a.accepted_by &&
-          !declinedAlertIds.includes(a.id) &&
-          !(user && a.user_id === user.id) &&
-          (departmentFilter === "all" || a.emergency_type === departmentFilter)
+          !(user && a.user_id === user.id)
       )
 
   // Siren sounds continuously till responder accepts or rejects (NEVER for victims or own alerts)
@@ -202,6 +234,7 @@ export function ActiveAlerts() {
 
   const handleRejectAlert = (alertId: string) => {
     const updated = Array.from(new Set([...declinedAlertIds, alertId]))
+    declinedAlertIdsRef.current.add(alertId)
     setDeclinedAlertIds(updated)
     try {
       localStorage.setItem("bridgex_declined_alert_ids", JSON.stringify(updated))
@@ -269,11 +302,11 @@ export function ActiveAlerts() {
           table: "alerts",
         },
         (payload) => {
-          let currentDeclined = declinedAlertIds
+          let currentDeclined = Array.from(declinedAlertIdsRef.current)
           let currentAccepted = myAcceptedAlertIds
           try {
             const dec = localStorage.getItem("bridgex_declined_alert_ids")
-            if (dec) currentDeclined = JSON.parse(dec)
+            if (dec) currentDeclined = Array.from(new Set([...currentDeclined, ...JSON.parse(dec)]))
             const acc = localStorage.getItem("bridgex_accepted_alert_ids")
             if (acc) currentAccepted = JSON.parse(acc)
           } catch {}
@@ -294,6 +327,11 @@ export function ActiveAlerts() {
             }
           } else if (payload.eventType === "UPDATE") {
             const updatedAlert = payload.new as Alert
+            if (decSet.has(updatedAlert.id)) {
+              // Ensure rejected alert is completely excluded
+              setAlerts((prev) => prev.filter((a) => a.id !== updatedAlert.id))
+              return
+            }
             if (updatedAlert.status === "resolved" || updatedAlert.status === "cancelled") {
               // Remove resolved/cancelled alerts from everyone
               setAlerts((prev) => prev.filter((a) => a.id !== updatedAlert.id))
@@ -340,7 +378,7 @@ export function ActiveAlerts() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user?.id, declinedAlertIds, myAcceptedAlertIds])
+  }, [user?.id])
 
   const fetchAlerts = async () => {
     try {
@@ -685,7 +723,7 @@ export function ActiveAlerts() {
 
       <div className="space-y-3">
         <AnimatePresence>
-          {alerts.filter((a) => departmentFilter === "all" || a.emergency_type === departmentFilter).length === 0 ? (
+          {visibleAlerts.length === 0 ? (
             <Card className="p-8 text-center">
               <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
               <p className="text-muted-foreground">
@@ -693,9 +731,7 @@ export function ActiveAlerts() {
               </p>
             </Card>
           ) : (
-            alerts
-              .filter((a) => departmentFilter === "all" || a.emergency_type === departmentFilter)
-              .map((alert) => (
+            visibleAlerts.map((alert) => (
               <motion.div
                 key={alert.id}
                 initial={{ opacity: 0, y: 10 }}
@@ -791,56 +827,68 @@ export function ActiveAlerts() {
                     </div>
                   )}
 
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex-1 text-xs gap-1 bg-transparent"
-                      onClick={() => handleViewDetails(alert)}
-                    >
-                      <Eye className="w-3 h-3" />
-                      View Details
-                    </Button>
-                    {alert.status === "active" && !alert.accepted_by && (
-                      <>
+                  <div className="pt-2">
+                    {alert.status === "active" && !alert.accepted_by ? (
+                      <div className="grid grid-cols-2 gap-2">
                         <Button
                           size="sm"
-                          className="flex-1 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white font-semibold"
-                          onClick={() => handleRespond(alert)}
+                          variant="outline"
+                          className="text-xs gap-1.5 w-full bg-background/50 hover:bg-muted font-medium h-8"
+                          onClick={() => handleViewDetails(alert)}
                         >
-                          <Phone className="w-3 h-3" />
-                          Respond {getVictimPhone(alert) ? `(${getVictimPhone(alert)})` : ""}
+                          <Eye className="w-3.5 h-3.5" />
+                          View Details
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-xs gap-1 border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                          className="text-xs gap-1.5 w-full border-red-300/80 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 font-medium h-8"
                           onClick={() => handleRejectAlert(alert.id)}
                         >
-                          <XCircle className="w-3 h-3" />
+                          <XCircle className="w-3.5 h-3.5" />
                           Reject
                         </Button>
-                      </>
-                    )}
-                    {(alert.status === "responding" || alert.accepted_by) && (
-                      <div className="flex-1 flex gap-2">
-                        {getVictimPhone(alert) && (
-                          <a
-                            href={`tel:${getVictimPhone(alert)}`}
-                            className="flex-1 py-1.5 px-3 rounded-md bg-green-600 hover:bg-green-700 text-white font-bold text-center text-xs flex items-center justify-center gap-1 shadow-sm"
-                          >
-                            <Phone className="w-3.5 h-3.5" /> Call {getVictimPhone(alert)}
-                          </a>
-                        )}
+                        <Button
+                          size="sm"
+                          className="col-span-2 text-xs gap-1.5 bg-green-600 hover:bg-green-700 text-white font-bold shadow-sm w-full h-8"
+                          onClick={() => handleRespond(alert)}
+                        >
+                          <Phone className="w-3.5 h-3.5" />
+                          Respond to SOS
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-xs gap-1 border-emerald-500 text-emerald-700 dark:text-emerald-300 font-semibold hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
-                          onClick={() => handleResolveAlert(alert.id)}
+                          className="flex-1 text-xs gap-1.5 bg-transparent h-8"
+                          onClick={() => handleViewDetails(alert)}
                         >
-                          <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                          Mark Resolved
+                          <Eye className="w-3.5 h-3.5" />
+                          View Details
                         </Button>
+                        {(alert.status === "responding" || alert.accepted_by) && (
+                          <div className="flex-1 flex gap-2">
+                            {getVictimPhone(alert) && (
+                              <a
+                                href={`tel:${getVictimPhone(alert)}`}
+                                className="flex-1 py-1 px-2.5 rounded-md bg-green-600 hover:bg-green-700 text-white font-bold text-center text-xs flex items-center justify-center gap-1 shadow-sm h-8"
+                              >
+                                <Phone className="w-3.5 h-3.5" /> Call
+                              </a>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs gap-1 border-emerald-500 text-emerald-700 dark:text-emerald-300 font-semibold hover:bg-emerald-50 dark:hover:bg-emerald-950/30 h-8"
+                              onClick={() => handleResolveAlert(alert.id)}
+                            >
+                              <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                              Resolve
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

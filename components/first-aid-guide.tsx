@@ -162,28 +162,33 @@ export function FirstAidGuide({
           <span>{label}</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto p-6">
-        <DialogHeader className="mb-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="p-2 bg-rose-500/15 text-rose-600 dark:text-rose-400 rounded-lg">
-                <HeartPulse className="w-5 h-5" />
-              </span>
-              <div>
-                <DialogTitle className="text-xl font-bold">Emergency First-Aid Protocols</DialogTitle>
-                <p className="text-xs text-muted-foreground">
-                  Instant step-by-step guidance & timing tools while waiting for responders
-                </p>
+      <DialogContent className="sm:max-w-2xl max-h-[88vh] flex flex-col p-0 overflow-hidden border border-border/80 shadow-2xl rounded-2xl bg-card">
+        {/* Pinned Header */}
+        <div className="px-5 sm:px-6 py-4 border-b bg-card/95 backdrop-blur-md shrink-0">
+          <DialogHeader className="pr-8 text-left">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="p-2.5 bg-rose-500/15 text-rose-600 dark:text-rose-400 rounded-xl shrink-0 ring-1 ring-rose-500/20">
+                  <HeartPulse className="w-6 h-6" />
+                </span>
+                <div>
+                  <DialogTitle className="text-lg sm:text-xl font-bold tracking-tight">Emergency First-Aid Protocols</DialogTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Instant step-by-step guidance & timing tools while waiting for responders
+                  </p>
+                </div>
               </div>
+              <a href="tel:112" className="shrink-0 hidden xs:inline-block">
+                <Button size="sm" variant="destructive" className="gap-1.5 text-xs h-8 px-3 shadow-sm font-semibold">
+                  <Phone className="w-3.5 h-3.5" /> Call 112
+                </Button>
+              </a>
             </div>
-            <a href="tel:112">
-              <Button size="sm" variant="destructive" className="gap-1 text-xs h-8">
-                <Phone className="w-3.5 h-3.5" /> Call 112
-              </Button>
-            </a>
-          </div>
-        </DialogHeader>
+          </DialogHeader>
+        </div>
 
+        {/* Scrollable Content Body */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4">
         <Tabs defaultValue="cpr" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 sm:grid-cols-6 h-auto p-1 bg-muted/70 gap-1 mb-4">
             <TabsTrigger value="cpr" className="text-xs py-2 gap-1.5 flex flex-col sm:flex-row">
@@ -429,14 +434,15 @@ export function FirstAidGuide({
             </div>
           </TabsContent>
         </Tabs>
+        </div>
 
-        {/* Footer Disclaimer */}
-        <div className="mt-4 pt-3 border-t text-xs text-muted-foreground flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
+        {/* Pinned Footer */}
+        <div className="px-5 sm:px-6 py-3 border-t bg-muted/40 text-xs text-muted-foreground flex items-center justify-between shrink-0">
+          <span className="flex items-center gap-1.5 font-medium">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
             Standard ERC/AHA protocol summary · Works 100% offline
           </span>
-          <span className="font-semibold text-rose-500">Emergency 112 / 108</span>
+          <span className="font-bold text-rose-500">Emergency 112 / 108</span>
         </div>
       </DialogContent>
     </Dialog>
