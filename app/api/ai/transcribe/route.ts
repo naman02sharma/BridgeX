@@ -85,16 +85,16 @@ export async function POST(req: Request) {
 
     const systemPrompt =
       `You are an emergency voice SOS response assistant for BridgeX. ` +
-      `Your job is to transcribe the user's spoken distress audio verbatim. ` +
-      `The speaker may be talking in any Indian language: Marathi (मराठी), Hindi (हिन्दी), Bengali (বাংলা), ` +
-      `Tamil (தமிழ்), Telugu (తెలుగు), Gujarati (ગુજરાતી), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), ` +
+      `Your job is to automatically detect the speaker's language from this distress audio and transcribe it verbatim. ` +
+      `The speaker may be talking in ANY language, especially Indian languages: Marathi (मराठी), Hindi (हिन्दी), ` +
+      `Bengali (বাংলা), Tamil (தமிழ்), Telugu (తెలుగు), Gujarati (ગુજરાતી), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), ` +
       `Punjabi (ਪੰਜਾਬੀ), Urdu (اردو), Odia (ଓଡ଼ିଆ), or English. ` +
-      (languageHint ? `The user selected language hint is "${languageHint}". ` : "") +
       `\n\nInstructions:\n` +
-      `1. Transcribe what the speaker said verbatim in the original native script (Devanagari for Marathi/Hindi, etc.). ` +
-      `2. Identify the language code (ISO 639-1 e.g. mr, hi, bn, ta, te, gu, pa, en). ` +
-      `3. Provide an accurate English translation of what was said. ` +
-      `4. Classify the emergency department: "medical" | "fire" | "security" | "other". ` +
+      `1. Listen to the audio and automatically detect what language was spoken on your own. Do not assume English. ` +
+      `2. Transcribe what the speaker said verbatim in the original native script (Devanagari for Marathi/Hindi, Bengali script, Tamil script, etc.). ` +
+      `3. Identify the ISO 639-1 language code (e.g. mr, hi, bn, ta, te, gu, pa, en). ` +
+      `4. Provide an accurate, detailed English translation of what was said. ` +
+      `5. Detect and classify the target emergency department based on what was said: "medical" | "fire" | "security" | "other". ` +
       `\n\nRespond ONLY with a valid JSON object matching this schema: ` +
       `{"transcript": "<native text in proper script>", "sourceLang": "<iso code>", "translation": "<english translation>", "category": "<medical|fire|security|other>", "confidence": 0.95}`
 

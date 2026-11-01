@@ -608,7 +608,12 @@ export function SOSInterfaceV2() {
     setResetSignal((k) => k + 1)
   }
 
-  const handleVoiceTranscript = (transcriptText: string, directTranslation?: string) => {
+  const handleVoiceTranscript = (
+    transcriptText: string,
+    directTranslation?: string,
+    detectedCategory?: string,
+    detectedLang?: string
+  ) => {
     const trimmed = transcriptText?.trim() || ""
     setMessage(trimmed)
     if (!trimmed) {
@@ -616,15 +621,31 @@ export function SOSInterfaceV2() {
       setDetectedSourceLang("")
       return
     }
+
     if (directTranslation) {
       setTranslatedEnglish(directTranslation)
     }
-    const script = detectIndicLanguage(trimmed)
-    const detectedLang = script.lang || voiceLang.split("-")[0]
-    setDetectedSourceLang(detectedLang)
+
+    if (detectedLang) {
+      setDetectedSourceLang(detectedLang)
+    } else {
+      const script = detectIndicLanguage(trimmed)
+      const detected = script.lang || "hi"
+      setDetectedSourceLang(detected)
+    }
+
+    // Auto-detect and route the emergency department on its own!
+    if (detectedCategory && detectedCategory !== "other") {
+      setSelectedType(detectedCategory)
+    } else {
+      const detected = classifyEmergency(trimmed, directTranslation || effectiveTranslatedEnglish)
+      if (detected.category !== "other") {
+        setSelectedType(detected.category)
+      }
+    }
 
     if (!directTranslation) {
-      translateMessage(trimmed, detectedLang)
+      translateMessage(trimmed, detectedLang || undefined)
     }
   }
 
@@ -870,18 +891,15 @@ export function SOSInterfaceV2() {
                   Tap to speak in <strong>Marathi, Hindi, Bengali, Tamil, Telugu, English</strong>, or any Indian language. BridgeX automatically detects your language, translates it to English, and classifies the emergency department in real time.
                 </p>
 
-                {/* Voice Input with Dual-Engine (Web Speech + Gemini Multimodal AI) */}
+                {/* Voice Input with Automated Language Detection, Transcription & Routing */}
                 <div className="pt-1">
                   <VoiceInputV2
                     onTranscript={(interim) => {
-                      // Live speech feedback while user is speaking
+                      // Live speech streaming feedback
                     }}
                     onFinalTranscript={handleVoiceTranscript}
                     onClear={handleClearMessage}
                     resetKey={resetSignal}
-                    language={voiceLang}
-                    languageName={supportedVoiceLanguages.find((l) => l.bcp47 === voiceLang)?.nativeName || "Any Language"}
-                    onLanguageChange={(newLang) => setVoiceLang(newLang)}
                   />
                 </div>
               </div>
