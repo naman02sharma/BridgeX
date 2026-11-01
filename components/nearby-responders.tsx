@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Hospital, Building2, Users, Phone, MapPin, Clock, Loader2, Navigation, AlertCircle } from "lucide-react"
+import { getUserLocation } from "@/lib/geolocation"
 
 interface Responder {
   id: string
@@ -80,35 +81,27 @@ export function NearbyResponders() {
     }
   }
 
-  const requestLocation = () => {
+  const requestLocation = async () => {
     setLoading(true)
     setError(null)
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser.")
-      setLoading(false)
-      return
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
+    try {
+      const coords = await getUserLocation(true)
+      if (coords && typeof coords.lat === "number" && typeof coords.lng === "number") {
         const loc = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
+          lat: coords.lat,
+          lng: coords.lng,
         }
         setUserLocation(loc)
-        fetchNearbyResponders(loc.lat, loc.lng)
-      },
-      (geoError) => {
-        console.warn("Location not available:", geoError)
-        setError("Please allow location access to discover real emergency services within 15-20 km.")
-        setLoading(false)
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000,
+        await fetchNearbyResponders(loc.lat, loc.lng)
+      } else {
+        setError("Location not available. Please allow GPS access.")
       }
-    )
+    } catch (err: any) {
+      console.warn("Location error:", err)
+      setError("Please allow location access to discover real emergency services within 15-20 km.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {

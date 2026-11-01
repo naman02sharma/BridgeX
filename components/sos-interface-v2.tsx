@@ -193,7 +193,7 @@ export function SOSInterfaceV2() {
     }
   }, [panicTimer])
 
-  // Poll the alert so the sender sees when a responder accepts it
+  // Poll and realtime sync the alert so the sender sees when a responder accepts or resolves it
   useEffect(() => {
     if (!sosActive || !alertId || alertId.startsWith("mock-")) return
     let stopped = false
@@ -215,8 +215,11 @@ export function SOSInterfaceV2() {
           })
           setPanicTimer(null)
         }
-        if (data.status === "resolved") {
-          toast({ title: t("sos.resolved", "Alert resolved"), description: t("sos.resolvedDesc", "The responder marked this emergency as resolved") })
+        if (data.status === "resolved" || data.status === "cancelled") {
+          toast({
+            title: t("sos.resolved", "Emergency Resolved"),
+            description: t("sos.resolvedDesc", "The responder marked this emergency as resolved"),
+          })
           resetSOS()
         }
       } catch {
@@ -224,10 +227,63 @@ export function SOSInterfaceV2() {
       }
     }
     check()
-    const timer = setInterval(check, 4000)
+    const timer = setInterval(check, 2000)
+
+    // Realtime Supabase channel for instant sub-second resolution sync
+    const channel = supabase
+      .channel(`victim-alert-sync-${alertId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "alerts",
+          filter: `id=eq.${alertId}`,
+        },
+        (payload) => {
+          if (stopped) return
+          const updated = payload.new as any
+          if (updated && (updated.status === "resolved" || updated.status === "cancelled")) {
+            toast({
+              title: t("sos.resolved", "Emergency Resolved"),
+              description: t("sos.resolvedDesc", "The responder marked this emergency as resolved"),
+            })
+            resetSOS()
+          } else if (updated?.status === "responding") {
+            setAcceptedBy((prev) => prev || "Assigned Responder")
+            setPanicTimer(null)
+          }
+        }
+      )
+      .subscribe()
+
+    // Same-browser / cross-tab instant resolution listener
+    const onResolvedEvent = (e: any) => {
+      if (stopped) return
+      const resolvedId =
+        e?.detail?.alertId ||
+        (typeof window !== "undefined" ? localStorage.getItem("bridgex_last_resolved_alert_id") : null)
+      if (resolvedId && (resolvedId === alertId || !alertId)) {
+        toast({
+          title: t("sos.resolved", "Emergency Resolved"),
+          description: t("sos.resolvedDesc", "The responder marked this emergency as resolved"),
+        })
+        resetSOS()
+      }
+    }
+    if (typeof window !== "undefined") {
+      window.addEventListener("bridgex_emergency_resolved", onResolvedEvent)
+      window.addEventListener("storage", onResolvedEvent)
+    }
+
     return () => {
       stopped = true
       clearInterval(timer)
+      supabase.removeChannel(channel)
+      if (typeof window !== "undefined") {
+        window.removeEventListener("bridgex_emergency_resolved", onResolvedEvent)
+        window.removeEventListener("storage", onResolvedEvent)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sosActive, alertId])
@@ -303,10 +359,10 @@ export function SOSInterfaceV2() {
     }
   }
 
-  const getLocation = async () => {
+  const getLocation = async (forceFresh = false) => {
     setLocationLoading(true)
     try {
-      const coords = await getUserLocation()
+      const coords = await getUserLocation(forceFresh)
       const newLoc = {
         lat: coords.lat,
         lng: coords.lng
@@ -1173,7 +1229,7 @@ export function SOSInterfaceV2() {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={getLocation}
+                        onClick={() => getLocation(true)}
                         className="h-7 text-xs text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100/50"
                       >
                         Refresh GPS
@@ -1184,7 +1240,7 @@ export function SOSInterfaceV2() {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={getLocation}
+                      onClick={() => getLocation(true)}
                       className="h-7 text-xs text-emerald-700"
                     >
                       Retry GPS

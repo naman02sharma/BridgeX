@@ -2,12 +2,12 @@ import { NextResponse } from "next/server"
 import { classifyEmergency } from "@/lib/emergency-classifier"
 
 export const runtime = "nodejs"
-export const maxDuration = 30 // Allow up to 30s for audio transcription
+export const maxDuration = 20 // Ultra-fast response for emergency SOS
 
 const TRANSCRIBE_MODELS = [
   "gemini-3.5-transcribe",
-  "gemini-3.8-flash",
-  "gemini-3.7-flash",
+  "gemini-3.1-flash-lite",
+  "gemini-3.5-flash-lite",
   "gemini-3.5-flash",
   "gemini-flash-latest",
 ]
@@ -125,11 +125,11 @@ export async function POST(req: Request) {
               ],
               generationConfig: {
                 responseMimeType: "application/json",
-                temperature: 0.1,
-                maxOutputTokens: 1024,
+                temperature: 0,
+                maxOutputTokens: 350,
               },
             }),
-            signal: AbortSignal.timeout(15000), // 15 second timeout
+            signal: AbortSignal.timeout(8000), // Fast 8s timeout per model attempt
           }
         )
 

@@ -194,15 +194,20 @@ export function VoiceInputV2({
       recognitionRef.current = null
     }
 
-    // Stop MediaRecorder
+    // Stop MediaRecorder and flush data immediately
     const recorder = mediaRecorderRef.current
     if (recorder && recorder.state !== "inactive") {
+      try {
+        if (typeof recorder.requestData === "function") {
+          recorder.requestData()
+        }
+      } catch {}
       try {
         recorder.stop()
       } catch {}
     }
 
-    await new Promise((r) => setTimeout(r, 250))
+    await new Promise((r) => setTimeout(r, 60))
     stopActiveStream()
 
     // Process recorded audio with Gemini AI
@@ -211,7 +216,7 @@ export function VoiceInputV2({
         type: audioChunksRef.current[0]?.type || "audio/webm",
       })
 
-      if (audioBlob.size > 2000) {
+      if (audioBlob.size > 400) {
         setIsAiTranscribing(true)
         try {
           const formData = new FormData()
@@ -377,9 +382,6 @@ export function VoiceInputV2({
               <Sparkles className="w-5 h-5 text-purple-600 animate-spin" />
               <span>AI is auto-detecting language, transcribing & classifying department…</span>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Powered by Google Gemini Neural Multimodal Speech Model
-            </p>
           </div>
         )}
 

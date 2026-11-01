@@ -22,48 +22,74 @@ const DEFAULT_COORDS: Coordinates = {
  * Fetch approximate coordinates from IP geolocation
  */
 async function getIpLocation(): Promise<Coordinates | null> {
+  // Provider 1: ipwho.is (fast, highly accurate for Indian and global IPs, no key required)
   try {
-    const res = await fetch("https://freeipapi.com/api/json", {
-      signal: AbortSignal.timeout(3000)
+    const res = await fetch("https://ipwho.is/", {
+      signal: AbortSignal.timeout(3500)
     })
-    if (!res.ok) return null
-    const data = await res.json()
-    if (typeof data.latitude === "number" && typeof data.longitude === "number") {
-      return {
-        lat: data.latitude,
-        lng: data.longitude,
-        city: data.cityName || data.regionName,
-        source: "ip"
+    if (res.ok) {
+      const data = await res.json()
+      if (data && data.success !== false && typeof data.latitude === "number" && typeof data.longitude === "number") {
+        return {
+          lat: data.latitude,
+          lng: data.longitude,
+          city: data.city || data.region,
+          source: "ip"
+        }
       }
     }
-  } catch (err) {
-    // Ignore IP fetch errors
-  }
+  } catch (err) {}
+
+  // Provider 2: freeipapi.com fallback
+  try {
+    const res = await fetch("https://freeipapi.com/api/json", {
+      signal: AbortSignal.timeout(3500)
+    })
+    if (res.ok) {
+      const data = await res.json()
+      if (typeof data.latitude === "number" && typeof data.longitude === "number") {
+        return {
+          lat: data.latitude,
+          lng: data.longitude,
+          city: data.cityName || data.regionName,
+          source: "ip"
+        }
+      }
+    }
+  } catch (err) {}
+
   return null
 }
 
 /**
- * High-reliability location getter:
- * 1. Checks recent localStorage cache
- * 2. Attempts browser GPS with 5s timeout
- * 3. Falls back to IP Geolocation if GPS is blocked/unavailable
- * 4. Falls back to default region if offline
+ * High-reliability, high-accuracy location getter:
+ * 1. Checks recent GPS cache (< 2 minutes old)
+ * 2. Attempts hardware/browser GPS with enableHighAccuracy: true and 8s timeout
+ * 3. Falls back to IP Geolocation if GPS is blocked or unavailable
+ * 4. Falls back to default region only if completely offline
  */
-export const getUserLocation = async (): Promise<Coordinates> => {
+export const getUserLocation = async (forceFresh = false): Promise<Coordinates> => {
   if (typeof window === "undefined") return DEFAULT_COORDS
 
-  // 1. Check cached position (valid for 15 mins)
-  try {
-    const cached = localStorage.getItem("bridgex_user_coords")
-    if (cached) {
-      const parsed = JSON.parse(cached)
-      if (parsed.lat && parsed.lng && Date.now() - (parsed.time || 0) < 15 * 60 * 1000) {
-        return { lat: parsed.lat, lng: parsed.lng, source: "cache" }
+  // 1. Check cached position if recent and high quality (< 2 minutes)
+  if (!forceFresh) {
+    try {
+      const cached = localStorage.getItem("bridgex_user_coords")
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (
+          parsed.lat &&
+          parsed.lng &&
+          parsed.source === "gps" &&
+          Date.now() - (parsed.time || 0) < 2 * 60 * 1000
+        ) {
+          return { lat: parsed.lat, lng: parsed.lng, accuracy: parsed.accuracy, source: "cache" }
+        }
       }
-    }
-  } catch {}
+    } catch {}
+  }
 
-  // 2. Try browser GPS
+  // 2. Try browser GPS with High Accuracy
   if ("geolocation" in navigator) {
     try {
       const position = await new Promise<Coordinates>((resolve, reject) => {
@@ -78,9 +104,9 @@ export const getUserLocation = async (): Promise<Coordinates> => {
           },
           (err) => reject(err),
           {
-            enableHighAccuracy: false, // Low accuracy is significantly faster & more reliable on desktop
-            timeout: 4000,
-            maximumAge: 60000,
+            enableHighAccuracy: true, // Precise GPS & Wi-Fi triangulation
+            timeout: 8000,
+            maximumAge: 0, // Force fresh position
           }
         )
       })

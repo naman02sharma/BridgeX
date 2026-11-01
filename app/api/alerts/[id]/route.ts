@@ -49,8 +49,9 @@ export async function PATCH(request: Request, { params }: Ctx) {
     const user = await getRequestUser(request)
     const isOwner = alert.user_id ? user?.id === alert.user_id : (!!body.guestId && body.guestId === alert.metadata?.guest_id)
     const isAcceptedResponder = !!user && alert.accepted_by === user.id
+    const isAnyResponder = !!user // Any authenticated responder or organization member
     if (action === "cancel" && !isOwner) return NextResponse.json({ success: false, error: "Only the sender can cancel this alert" }, { status: 403 })
-    if (action === "resolve" && !isOwner && !isAcceptedResponder) return NextResponse.json({ success: false, error: "Not allowed" }, { status: 403 })
+    if (action === "resolve" && !isOwner && !isAcceptedResponder && !isAnyResponder) return NextResponse.json({ success: false, error: "Not allowed" }, { status: 403 })
 
     if (["cancelled", "resolved"].includes(alert.status)) return NextResponse.json({ success: true, status: alert.status })
 
@@ -67,6 +68,13 @@ export async function PATCH(request: Request, { params }: Ctx) {
       await db
         .from("notifications")
         .update({ status: "cancelled", read: false, title: "Alert cancelled by the sender", message: "The sender cancelled this SOS. No response is needed.", body: "The sender cancelled this SOS. No response is needed." })
+        .eq("alert_id", id)
+        .eq("type", "alert")
+    } else if (action === "resolve") {
+      // Mark notifications as resolved
+      await db
+        .from("notifications")
+        .update({ status: "resolved", read: true })
         .eq("alert_id", id)
         .eq("type", "alert")
     }

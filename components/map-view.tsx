@@ -79,7 +79,7 @@ export function MapView() {
     setLoading(true)
     try {
       localStorage.removeItem("bridgex_user_coords")
-      const coords = await getUserLocation()
+      const coords = await getUserLocation(true)
       const loc = { lat: coords.lat, lng: coords.lng }
       setUserLocation(loc)
       await loadMapResources(loc)

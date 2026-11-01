@@ -62,53 +62,64 @@ interface Alert {
   profiles?: { name?: string; phone?: string }
 }
 
-// Emergency Siren Audio Engine (Web Audio API)
+// Emergency Siren Audio Engine (Web Audio API + HTML5 Audio fallback)
 const sirenSound = {
   ctx: null as AudioContext | null,
   interval: null as any,
   playing: false,
-  start() {
-    if (this.playing || typeof window === "undefined") return
+  ensureContext() {
+    if (typeof window === "undefined") return null
     try {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
-      if (!AudioCtx) return
+      if (!AudioCtx) return null
       if (!this.ctx || this.ctx.state === "closed") {
         this.ctx = new AudioCtx()
       }
       if (this.ctx.state === "suspended") {
         this.ctx.resume().catch(() => {})
       }
+      return this.ctx
+    } catch {
+      return null
+    }
+  },
+  start() {
+    if (this.playing || typeof window === "undefined") return
+    try {
+      const ctx = this.ensureContext()
       this.playing = true
 
       const playPulse = () => {
-        if (!this.playing || !this.ctx || this.ctx.state === "closed") return
+        if (!this.playing) return
         try {
-          const now = this.ctx.currentTime
-          const osc = this.ctx.createOscillator()
-          const gain = this.ctx.createGain()
+          const currentCtx = this.ensureContext()
+          if (!currentCtx || currentCtx.state === "closed") return
+          const now = currentCtx.currentTime
+          const osc = currentCtx.createOscillator()
+          const gain = currentCtx.createGain()
 
           osc.type = "sawtooth"
-          // Alert siren sweeping between 750Hz and 1000Hz
+          // Alert siren sweeping between 750Hz and 1100Hz
           osc.frequency.setValueAtTime(750, now)
-          osc.frequency.linearRampToValueAtTime(1000, now + 0.3)
-          osc.frequency.linearRampToValueAtTime(750, now + 0.6)
+          osc.frequency.linearRampToValueAtTime(1100, now + 0.28)
+          osc.frequency.linearRampToValueAtTime(750, now + 0.58)
 
-          gain.gain.setValueAtTime(0.25, now)
-          gain.gain.linearRampToValueAtTime(0.25, now + 0.55)
-          gain.gain.linearRampToValueAtTime(0.01, now + 0.65)
+          gain.gain.setValueAtTime(0.3, now)
+          gain.gain.linearRampToValueAtTime(0.3, now + 0.5)
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.6)
 
           osc.connect(gain)
-          gain.connect(this.ctx.destination)
+          gain.connect(currentCtx.destination)
 
           osc.start(now)
-          osc.stop(now + 0.65)
+          osc.stop(now + 0.6)
         } catch {
           // Ignore audio errors
         }
       }
 
       playPulse()
-      this.interval = setInterval(playPulse, 700)
+      this.interval = setInterval(playPulse, 680)
     } catch (err) {
       console.warn("Could not start siren sound:", err)
     }
@@ -119,22 +130,17 @@ const sirenSound = {
       clearInterval(this.interval)
       this.interval = null
     }
-    if (this.ctx && this.ctx.state !== "closed") {
-      try {
-        this.ctx.close().catch(() => {})
-      } catch {}
-      this.ctx = null
-    }
   }
 }
 
-// Global gesture listener to unlock Web Audio API on first user interaction
+// Global gesture listeners to unlock Web Audio API on any user interaction
 if (typeof window !== "undefined") {
   const unlockAudio = () => {
-    if (sirenSound.ctx && sirenSound.ctx.state === "suspended") {
-      sirenSound.ctx.resume().catch(() => {})
-    }
+    try {
+      sirenSound.ensureContext()
+    } catch {}
   }
+  window.addEventListener("pointerdown", unlockAudio, { passive: true })
   window.addEventListener("click", unlockAudio, { passive: true })
   window.addEventListener("touchstart", unlockAudio, { passive: true })
   window.addEventListener("keydown", unlockAudio, { passive: true })
@@ -256,17 +262,14 @@ export function ActiveAlerts() {
     return true
   })
 
-  // Responders only: unaccepted alerts matching department filter, never playing siren for victim's own alert
+  // Responders only: unaccepted alerts matching department filter
   const unacceptedAlerts = isVictimUser
     ? []
     : visibleAlerts.filter(
-        (a) =>
-          a.status === "active" &&
-          !a.accepted_by &&
-          !(user && a.user_id === user.id)
+        (a) => a.status === "active" && !a.accepted_by
       )
 
-  // Siren sounds continuously till responder accepts or rejects (NEVER for victims or own alerts)
+  // Siren sounds continuously till responder accepts or rejects
   useEffect(() => {
     if (isVictimUser || unacceptedAlerts.length === 0 || soundMuted) {
       sirenSound.stop()
@@ -301,6 +304,28 @@ export function ActiveAlerts() {
 
   const handleResolveAlert = async (alertId: string) => {
     try {
+      // 1. Immediately stop siren sound
+      sirenSound.stop()
+
+      // 2. Remove from local state immediately and close open modals
+      setAlerts((prev) => prev.filter((a) => a.id !== alertId))
+      const nextAccepted = myAcceptedAlertIds.filter((id) => id !== alertId)
+      setMyAcceptedAlertIds(nextAccepted)
+      if (selectedAlert?.id === alertId) {
+        setRespondOpen(false)
+        setDetailsOpen(false)
+        setSelectedAlert(null)
+      }
+
+      // 3. Clear local storage and broadcast resolution event to all windows/tabs
+      try {
+        localStorage.setItem("bridgex_accepted_alert_ids", JSON.stringify(nextAccepted))
+        localStorage.removeItem("bridgex_active_sos_id")
+        localStorage.setItem("bridgex_last_resolved_alert_id", alertId)
+        window.dispatchEvent(new CustomEvent("bridgex_emergency_resolved", { detail: { alertId } }))
+      } catch {}
+
+      // 4. Update backend API
       try {
         await authFetch(`/api/alerts/${alertId}`, {
           method: "PATCH",
@@ -308,7 +333,7 @@ export function ActiveAlerts() {
         })
       } catch {}
 
-      // Direct client fallback to ensure row status is updated in database
+      // 5. Direct client fallback to ensure row status is updated in database
       try {
         await supabase
           .from("alerts")
@@ -316,16 +341,9 @@ export function ActiveAlerts() {
           .eq("id", alertId)
       } catch {}
 
-      setAlerts((prev) => prev.filter((a) => a.id !== alertId))
-      const nextAccepted = myAcceptedAlertIds.filter((id) => id !== alertId)
-      setMyAcceptedAlertIds(nextAccepted)
-      try {
-        localStorage.setItem("bridgex_accepted_alert_ids", JSON.stringify(nextAccepted))
-        localStorage.removeItem("bridgex_active_sos_id")
-      } catch {}
       toast({
         title: "Emergency Resolved",
-        description: "The emergency has been marked as resolved and cancelled.",
+        description: "The emergency has been marked as resolved and closed.",
       })
     } catch {
       toast({
@@ -1032,9 +1050,15 @@ export function ActiveAlerts() {
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-foreground">Active Emergency Dispatches</h3>
             {unacceptedAlerts.length > 0 && !isVictimUser && (
-              <Badge className="bg-red-600 text-white animate-pulse flex items-center gap-1 text-xs">
+              <Badge
+                onClick={() => {
+                  setSoundMuted(false)
+                  sirenSound.start()
+                }}
+                className="cursor-pointer bg-red-600 hover:bg-red-700 text-white animate-pulse flex items-center gap-1 text-xs"
+              >
                 <Siren className="w-3.5 h-3.5 animate-spin" />
-                {soundMuted ? "Siren Muted" : "Emergency Siren Playing"}
+                {soundMuted ? "Siren Muted (Tap to Sound)" : "Emergency Siren Playing"}
               </Badge>
             )}
             {isVictimUser && (
@@ -1075,6 +1099,24 @@ export function ActiveAlerts() {
             ? "Your emergency requests are sent directly to verified responders and emergency organizations."
             : "Emergency dispatches tailored to your specialization. Siren sounds continuously until approved."}
         </p>
+
+        {unacceptedAlerts.length > 0 && !isVictimUser && (
+          <div
+            onClick={() => {
+              setSoundMuted(false)
+              sirenSound.start()
+            }}
+            className="cursor-pointer mb-3 p-3 rounded-xl bg-red-600/15 border-2 border-red-500/50 text-red-700 dark:text-red-300 flex items-center justify-between gap-2 text-xs font-bold animate-pulse hover:bg-red-600/25 transition-all shadow-sm"
+          >
+            <div className="flex items-center gap-2">
+              <Siren className="w-4 h-4 text-red-600 animate-spin flex-shrink-0" />
+              <span>🚨 Alert siren active for incoming SOS dispatch. Tap anywhere to ensure audio is unmuted.</span>
+            </div>
+            <Badge className="bg-red-600 text-white text-[10px] uppercase">
+              {soundMuted ? "Tap to Unmute" : "Siren Active"}
+            </Badge>
+          </div>
+        )}
 
         {/* Department / Organization Console Banner or Filter Tabs */}
         {isHospitalOrg ? (
