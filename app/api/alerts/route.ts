@@ -84,7 +84,7 @@ export async function POST(request: Request) {
 
       // The user has no profile row yet (foreign key): save the alert without the link
       if (error && error.code === '23503') {
-        ;({ error } = await db.from('alerts').insert({ ...alertRow, user_id: null }))
+        ; ({ error } = await db.from('alerts').insert({ ...alertRow, user_id: null }))
       }
 
       if (error) {
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
 
     } catch (dbError: any) {
       console.warn('[API] Database unavailable, using mock response:', dbError.message)
-      
+
       // Mock alert response when database is not available
       alert = {
         id: `mock-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -143,7 +143,7 @@ export async function POST(request: Request) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
-      
+
       console.log('[API] Mock alert created:', alert.id)
     }
 
@@ -155,8 +155,8 @@ export async function POST(request: Request) {
     })
   } catch (error: any) {
     console.error("[API] Alert creation error:", error)
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: error.message || "Failed to create alert",
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     }, { status: 500 })

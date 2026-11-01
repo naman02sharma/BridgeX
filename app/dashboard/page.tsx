@@ -20,6 +20,26 @@ export default function DashboardPage() {
   const { user, loading } = useSupabase()
   const router = useRouter()
 
+  const isResponder = Boolean(
+    user &&
+    user.role !== "user" &&
+    user.role !== "victim" &&
+    (
+      user.role === "responder" ||
+      user.role === "hospital" ||
+      user.role === "fire" ||
+      user.role === "police" ||
+      user.role === "volunteer" ||
+      user.role === "ngo" ||
+      Boolean(user.organization) ||
+      Boolean((user as any)?.specialization) ||
+      Boolean((user as any)?.user_metadata?.organization) ||
+      Boolean((user as any)?.user_metadata?.responderRole) ||
+      Boolean((user as any)?.user_metadata?.specificRole)
+    )
+  )
+  const isCitizen = !isResponder
+
   useEffect(() => {
     if (loading) return
 
@@ -30,12 +50,11 @@ export default function DashboardPage() {
     }
 
     // Citizens / Victims have NO dashboard: redirect to Home SOS interface
-    const isCitizen = user.role === "user" || user.role === "victim"
     if (isCitizen) {
       toast.info("The operations dashboard is for emergency responders. Citizens can broadcast SOS from the home screen.")
       router.push("/")
     }
-  }, [user, loading, router])
+  }, [user, loading, router, isCitizen])
 
   if (loading) {
     return (
@@ -47,7 +66,7 @@ export default function DashboardPage() {
   }
 
   // Block rendering for citizen/victim users
-  if (!user || user.role === "user" || user.role === "victim") {
+  if (!user || isCitizen) {
     return null
   }
 

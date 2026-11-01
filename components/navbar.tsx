@@ -21,7 +21,24 @@ export function Navbar() {
   const { user, loading } = useSupabase()
   const { t } = useGlobalTranslation()
   const router = useRouter()
-  const isResponder = !!user && user.role !== "user" && user.role !== "victim"
+  const isResponder = Boolean(
+    user &&
+    user.role !== "user" &&
+    user.role !== "victim" &&
+    (
+      user.role === "responder" ||
+      user.role === "hospital" ||
+      user.role === "fire" ||
+      user.role === "police" ||
+      user.role === "volunteer" ||
+      user.role === "ngo" ||
+      Boolean(user.organization) ||
+      Boolean((user as any)?.specialization) ||
+      Boolean((user as any)?.user_metadata?.organization) ||
+      Boolean((user as any)?.user_metadata?.responderRole) ||
+      Boolean((user as any)?.user_metadata?.specificRole)
+    )
+  )
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,6 +59,7 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/", label: "navigation.home" },
+    ...(isResponder ? [{ href: "/dashboard", label: "navigation.dashboard", isDashboard: true }] : []),
     { href: "/about", label: "navigation.about" },
     { href: "/map", label: "navigation.map" },
     { href: "/responders", label: "navigation.responders" },
@@ -81,16 +99,34 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group rounded-lg hover:bg-muted/50"
+                  className={
+                    (link as any).isDashboard
+                      ? "px-3 py-1.5 text-xs font-bold text-red-500 bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 transition-all rounded-lg flex items-center gap-1.5 shadow-sm"
+                      : "px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group rounded-lg hover:bg-muted/50"
+                  }
                 >
-                  {t(link.label)}
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-red-600 to-orange-600 group-hover:w-3/4 transition-all duration-300" />
+                  {(link as any).isDashboard && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
+                  {t(link.label, (link as any).isDashboard ? "Operations Dashboard" : undefined)}
+                  {!(link as any).isDashboard && (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-red-600 to-orange-600 group-hover:w-3/4 transition-all duration-300" />
+                  )}
                 </Link>
               ))}
             </div>
 
             {/* Action Tools & Controls */}
             <div className="hidden md:flex items-center gap-2 lg:gap-2.5">
+              {isResponder && (
+                <Button
+                  size="sm"
+                  onClick={() => router.push("/dashboard")}
+                  className="h-8 px-3 text-xs font-bold bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white shadow-md shadow-red-600/20 gap-1.5 flex items-center"
+                >
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  Dashboard
+                </Button>
+              )}
+
               <FirstAidGuide size="sm" variant="outline" label="First Aid" />
               <EmergencyBeacon size="sm" variant="destructive" label="Beacon & Siren" />
 
@@ -209,9 +245,21 @@ export function Navbar() {
                         <Link
                           href={link.href}
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="block px-4 py-3 text-base font-medium text-foreground hover:bg-accent rounded-lg transition-colors"
+                          className={
+                            (link as any).isDashboard
+                              ? "flex items-center justify-between p-3.5 text-base font-bold text-red-500 bg-red-500/10 border border-red-500/30 rounded-xl"
+                              : "block px-4 py-3 text-base font-medium text-foreground hover:bg-accent rounded-lg transition-colors"
+                          }
                         >
-                          {t(link.label)}
+                          <span className="flex items-center gap-2">
+                            {(link as any).isDashboard && <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />}
+                            {t(link.label, (link as any).isDashboard ? "Operations Dashboard" : undefined)}
+                          </span>
+                          {(link as any).isDashboard && (
+                            <span className="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded-full font-bold uppercase">
+                              On Duty
+                            </span>
+                          )}
                         </Link>
                       </motion.div>
                     ))}

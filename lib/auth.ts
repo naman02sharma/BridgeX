@@ -25,9 +25,28 @@ export interface Session {
 // Convert Supabase user to our User type
 export function convertSupabaseUser(supabaseUser: SupabaseUser, profile?: any, responder?: any): User {
   const metaRole = supabaseUser.user_metadata?.specificRole || supabaseUser.user_metadata?.responderRole
-  const role = (profile?.role && profile.role !== 'responder')
-    ? profile.role
-    : (metaRole || profile?.role || supabaseUser.user_metadata?.role || 'user')
+  const org = responder?.organization || profile?.organization || supabaseUser.user_metadata?.organization
+  const rawProfRole = profile?.role
+  const rawMetaRole = supabaseUser.user_metadata?.role
+
+  // Determine if user registered as a responder or emergency organization
+  const isExplicitResponder =
+    (metaRole && metaRole !== "user" && metaRole !== "victim") ||
+    (rawProfRole && rawProfRole !== "user" && rawProfRole !== "victim") ||
+    (Boolean(org) && typeof org === "string" && org.trim().length > 0) ||
+    Boolean(responder)
+
+  let role: UserRole = "user"
+  if (isExplicitResponder) {
+    role = (metaRole && metaRole !== "user" && metaRole !== "victim")
+      ? metaRole
+      : (rawProfRole && rawProfRole !== "user" && rawProfRole !== "victim")
+      ? rawProfRole
+      : "responder"
+  } else {
+    role = rawProfRole || metaRole || rawMetaRole || "user"
+  }
+
   const specs = responder?.specializations || (role !== 'user' ? [role] : [])
   const primarySpec = specs[0] || (role !== 'user' ? role : undefined)
 
@@ -36,7 +55,7 @@ export function convertSupabaseUser(supabaseUser: SupabaseUser, profile?: any, r
     email: supabaseUser.email!,
     name: profile?.name || supabaseUser.user_metadata?.name,
     role,
-    organization: responder?.organization || profile?.organization || supabaseUser.user_metadata?.organization,
+    organization: org,
     phone: profile?.phone || supabaseUser.user_metadata?.phone,
     specialization: primarySpec,
     specializations: specs,

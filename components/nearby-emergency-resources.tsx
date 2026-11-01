@@ -48,31 +48,44 @@ export function NearbyEmergencyResources({
         return
       }
 
-      // Secondary fallback to /api/nearby
-      if (result.userLocation) {
-        try {
-          const res = await fetch(`/api/nearby?lat=${result.userLocation.lat}&lng=${result.userLocation.lon}&radius=20`)
-          if (res.ok) {
-            const data = await res.json()
-            if (Array.isArray(data.responders) && data.responders.length > 0) {
-              const mapped: NearbyPlace[] = data.responders.map((r: any) => ({
-                id: r.id,
-                name: r.name,
-                category: r.type as any,
-                lat: r.lat,
-                lon: r.lng,
-                distance: r.distanceKm ? Math.round(r.distanceKm * 1000) : undefined,
-                address: r.address,
-                phone: r.contact,
-                emergency: true
-              }))
-              setPlaces(mapped)
-              setUserLocation(result.userLocation)
-              return
-            }
+      // Secondary fallback to /api/places with resolved or regional location
+      const fallbackLat = result.userLocation?.lat || 19.0760
+      const fallbackLon = result.userLocation?.lon || 72.8777
+      try {
+        const res = await fetch(`/api/places?lat=${fallbackLat}&lng=${fallbackLon}&radius=${radiusMeters}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data.places) && data.places.length > 0) {
+            setPlaces(data.places)
+            setUserLocation({ lat: fallbackLat, lon: fallbackLon })
+            return
           }
-        } catch {}
-      }
+        }
+      } catch {}
+
+      // Tertiary fallback to /api/nearby
+      try {
+        const res = await fetch(`/api/nearby?lat=${fallbackLat}&lng=${fallbackLon}&radius=20`)
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data.responders) && data.responders.length > 0) {
+            const mapped: NearbyPlace[] = data.responders.map((r: any) => ({
+              id: r.id,
+              name: r.name,
+              category: r.type as any,
+              lat: r.lat,
+              lon: r.lng,
+              distance: r.distanceKm ? Math.round(r.distanceKm * 1000) : undefined,
+              address: r.address,
+              phone: r.contact,
+              emergency: true
+            }))
+            setPlaces(mapped)
+            setUserLocation({ lat: fallbackLat, lon: fallbackLon })
+            return
+          }
+        }
+      } catch {}
 
       if (!result.success) {
         setError(result.error || 'Failed to fetch nearby resources')

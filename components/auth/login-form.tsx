@@ -40,15 +40,31 @@ export function LoginForm() {
       let userPhone = user?.user_metadata?.phone || ""
       let userName = user?.user_metadata?.name || ""
 
-      // Fetch persisted phone and role from profile table
+      // Fetch persisted phone and role from profile and responders table
       if (user?.id) {
         try {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("role, phone, name")
-            .eq("id", user.id)
-            .maybeSingle()
-          if (profile?.role && profile.role !== "responder") userRole = profile.role
+          const [{ data: profile }, { data: responder }] = await Promise.all([
+            supabase.from("profiles").select("role, phone, name, organization").eq("id", user.id).maybeSingle(),
+            supabase.from("responders").select("id, organization, specializations, type").eq("user_id", user.id).maybeSingle()
+          ])
+          const org = responder?.organization || profile?.organization || user.user_metadata?.organization
+          const metaRole = user.user_metadata?.specificRole || user.user_metadata?.responderRole
+          const isExplicitResponder =
+            (metaRole && metaRole !== "user" && metaRole !== "victim") ||
+            (profile?.role && profile.role !== "user" && profile.role !== "victim") ||
+            (Boolean(org) && typeof org === "string" && org.trim().length > 0) ||
+            Boolean(responder)
+
+          if (isExplicitResponder) {
+            userRole = (metaRole && metaRole !== "user" && metaRole !== "victim")
+              ? metaRole
+              : (profile?.role && profile.role !== "user" && profile.role !== "victim")
+              ? profile.role
+              : "responder"
+          } else if (profile?.role) {
+            userRole = profile.role
+          }
+
           if (profile?.phone) userPhone = profile.phone
           if (profile?.name) userName = profile.name
         } catch (err) {
