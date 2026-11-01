@@ -124,15 +124,7 @@ export const getUserLocation = async (
 ): Promise<Coordinates> => {
   if (typeof window === "undefined") return DEFAULT_COORDS
 
-  // 1. Check user explicitly selected area (e.g. Panvel, Navi Mumbai)
-  try {
-    const selectedCity = localStorage.getItem("bridgex_selected_city")
-    if (selectedCity === "Panvel") {
-      return { lat: 18.9894, lng: 73.1175, city: "Panvel", source: "account" }
-    }
-  } catch {}
-
-  // 2. Check cached position if recent and not the Kurla ISP gateway (< 2 minutes)
+  // 1. Check cached position if recent and not the Kurla ISP gateway (< 2 minutes)
   if (!forceFresh) {
     try {
       const cached = localStorage.getItem("bridgex_user_coords")
