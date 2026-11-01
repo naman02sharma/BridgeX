@@ -88,7 +88,7 @@ export function SOSInterfaceV2() {
   const [isActivating, setIsActivating] = useState(false)
   const [sosActive, setSosActive] = useState(false)
   const [showDetails, setShowDetails] = useState(true)
-  const [selectedType, setSelectedType] = useState<string>("medical")
+  const [selectedType, setSelectedType] = useState<string>("auto")
   const [message, setMessage] = useState("")
   const [victimPhone, setVictimPhone] = useState("")
   const [detailedAddress, setDetailedAddress] = useState("")
@@ -386,10 +386,24 @@ export function SOSInterfaceV2() {
       }
 
       // Auto-detect emergency type and organization routing
-      const detected = classifyEmergency(message, translatedEnglish)
-      const finalEmergencyType = (selectedType && selectedType !== "other")
+      const detected = classifyEmergency(message, effectiveTranslatedEnglish || translatedEnglish)
+      const finalEmergencyType = (selectedType && selectedType !== "auto" && selectedType !== "other")
         ? selectedType
         : (detected.category !== "other" ? detected.category : "medical")
+
+      const routedOrg =
+        finalEmergencyType === "fire"
+          ? "Fire Brigade & Rescue Service"
+          : finalEmergencyType === "security"
+          ? "Police & Law Enforcement"
+          : "Hospital & Ambulance Emergency Service"
+
+      const routedHelpline =
+        finalEmergencyType === "fire"
+          ? "101"
+          : finalEmergencyType === "security"
+          ? "112"
+          : "102 / 108"
 
       // Resolved address automatically from GPS Geolocation
       const resolvedAddress = geocodedArea || detailedAddress || (location ? `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}` : "GPS Geolocation Acquired")
@@ -422,9 +436,9 @@ export function SOSInterfaceV2() {
         metadata: {
           phone: phoneToUse,
           victim_phone: phoneToUse,
-          routed_organization: detected.organization,
-          routed_helpline: detected.helpline,
-          detected_category: detected.category,
+          routed_organization: routedOrg,
+          routed_helpline: routedHelpline,
+          detected_category: finalEmergencyType,
           detected_confidence: detected.confidence,
           matched_keywords: detected.keywordsMatched,
           address_details: resolvedAddress,
@@ -947,7 +961,7 @@ export function SOSInterfaceV2() {
                 )}
               </div>
 
-              {/* 3. AI Auto-Detected Emergency Department & Direct Routing */}
+              {/* 3. Emergency Department Routing (Direct Selection & AI Auto-Detection) */}
               <div className="space-y-3 rounded-2xl border-2 p-5 bg-gradient-to-br from-card via-card/90 to-muted/30 shadow-md">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -958,62 +972,112 @@ export function SOSInterfaceV2() {
                   </div>
                   <Badge
                     className={`${
-                      detectedEmergency.category === "medical"
-                        ? "bg-red-600 hover:bg-red-700"
-                        : detectedEmergency.category === "fire"
+                      (selectedType !== "auto" ? selectedType : detectedEmergency.category) === "fire"
                         ? "bg-orange-600 hover:bg-orange-700"
-                        : detectedEmergency.category === "security"
+                        : (selectedType !== "auto" ? selectedType : detectedEmergency.category) === "security"
                         ? "bg-blue-600 hover:bg-blue-700"
-                        : "bg-muted text-muted-foreground"
+                        : "bg-red-600 hover:bg-red-700"
                     } text-white font-semibold text-xs capitalize`}
                   >
-                    {detectedEmergency.category === "other" ? "Auto-Detecting from Voice..." : `${detectedEmergency.category} Department`}
+                    {selectedType === "auto"
+                      ? (detectedEmergency.category !== "other" ? `AI Auto: ${detectedEmergency.category}` : "AI Auto: Medical")
+                      : `Manual: ${selectedType}`}
                   </Badge>
                 </div>
 
-                {detectedEmergency.category !== "other" ? (
-                  <div className={`p-4 rounded-xl border-2 text-white bg-gradient-to-r ${detectedEmergency.gradient} shadow-lg space-y-2.5 transition-all`}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2.5 rounded-lg bg-white/20">
-                          {detectedEmergency.category === "medical" && <Heart className="w-7 h-7 text-white" />}
-                          {detectedEmergency.category === "fire" && <Flame className="w-7 h-7 text-white" />}
-                          {detectedEmergency.category === "security" && <Shield className="w-7 h-7 text-white" />}
-                        </div>
-                        <div>
-                          <div className="text-lg font-extrabold tracking-tight">
-                            {detectedEmergency.label.toUpperCase()}
-                          </div>
-                          <div className="text-xs text-white/95 font-medium">
-                            Dispatched Directly To: <strong>{detectedEmergency.organization}</strong>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge className="bg-white/20 text-white font-bold border-white/30 text-xs flex-shrink-0">
-                        Helpline: {detectedEmergency.helpline}
-                      </Badge>
-                    </div>
+                {/* Direct Department Selector Buttons */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                  {[
+                    { id: "auto", label: "Auto (AI)", icon: Sparkles, color: "text-amber-500", desc: "Auto-detect" },
+                    { id: "medical", label: "Medical (102)", icon: Heart, color: "text-red-500", desc: "Ambulance" },
+                    { id: "fire", label: "Fire (101)", icon: Flame, color: "text-orange-500", desc: "Fire Brigade" },
+                    { id: "security", label: "Police (112)", icon: Shield, color: "text-blue-500", desc: "Law Enforcement" },
+                  ].map((dept) => {
+                    const isSelected = selectedType === dept.id
+                    const Icon = dept.icon
+                    return (
+                      <button
+                        key={dept.id}
+                        type="button"
+                        onClick={() => setSelectedType(dept.id)}
+                        className={`flex flex-col items-center justify-center p-2.5 rounded-xl border-2 text-xs transition-all ${
+                          isSelected
+                            ? "border-primary bg-primary/10 shadow-sm font-bold ring-2 ring-primary/20"
+                            : "border-border bg-card/60 hover:bg-muted/50 text-muted-foreground"
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 mb-1 ${dept.color}`} />
+                        <span className="font-semibold text-foreground text-[11px]">{dept.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
 
-                    {detectedEmergency.keywordsMatched.length > 0 && (
-                      <div className="text-xs text-white/85 pt-1.5 border-t border-white/20 flex items-center gap-1.5 flex-wrap">
-                        <span>Auto-classified from:</span>
-                        {detectedEmergency.keywordsMatched.map((kw, i) => (
-                          <span key={i} className="bg-white/25 px-2 py-0.5 rounded text-[11px] font-bold">
-                            "{kw}"
-                          </span>
-                        ))}
+                {/* Routed Organization Card */}
+                {(() => {
+                  const currentDept = (selectedType && selectedType !== "auto" && selectedType !== "other")
+                    ? selectedType
+                    : (detectedEmergency.category !== "other" ? detectedEmergency.category : "medical")
+
+                  const meta = currentDept === "fire"
+                    ? {
+                        label: "FIRE BRIGADE & RESCUE SERVICE",
+                        org: "Fire Brigade & Rescue Department (101)",
+                        helpline: "101",
+                        gradient: "from-orange-600 via-amber-600 to-red-600",
+                        icon: Flame,
+                      }
+                    : currentDept === "security"
+                    ? {
+                        label: "POLICE & LAW ENFORCEMENT",
+                        org: "Police & Security Command (112)",
+                        helpline: "112",
+                        gradient: "from-blue-600 via-indigo-600 to-sky-700",
+                        icon: Shield,
+                      }
+                    : {
+                        label: "HOSPITAL & TRAUMA EMERGENCY",
+                        org: "Emergency Ambulance & Medical Response (102 / 108)",
+                        helpline: "102 / 108",
+                        gradient: "from-red-600 via-rose-600 to-red-700",
+                        icon: Heart,
+                      }
+
+                  const DeptIcon = meta.icon
+                  return (
+                    <div className={`p-4 rounded-xl border-2 text-white bg-gradient-to-r ${meta.gradient} shadow-lg space-y-2.5 transition-all`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2.5 rounded-lg bg-white/20">
+                            <DeptIcon className="w-7 h-7 text-white" />
+                          </div>
+                          <div>
+                            <div className="text-lg font-extrabold tracking-tight">
+                              {meta.label}
+                            </div>
+                            <div className="text-xs text-white/95 font-medium">
+                              Dispatched Directly To: <strong>{meta.org}</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <Badge className="bg-white/20 text-white font-bold border-white/30 text-xs flex-shrink-0">
+                          Helpline: {meta.helpline}
+                        </Badge>
                       </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="p-4 rounded-xl border bg-muted/40 text-xs text-muted-foreground flex items-center gap-3">
-                    <Radio className="w-5 h-5 text-primary flex-shrink-0 animate-pulse" />
-                    <div>
-                      <p className="font-semibold text-foreground text-sm">Speak or type your emergency in any language</p>
-                      <p>BridgeX AI analyzes your words to route directly to <strong>Ambulance (102)</strong>, <strong>Fire (101)</strong>, or <strong>Police (112)</strong>.</p>
+
+                      {detectedEmergency.keywordsMatched.length > 0 && selectedType === "auto" && (
+                        <div className="text-xs text-white/85 pt-1.5 border-t border-white/20 flex items-center gap-1.5 flex-wrap">
+                          <span>Auto-classified from:</span>
+                          {detectedEmergency.keywordsMatched.map((kw, i) => (
+                            <span key={i} className="bg-white/25 px-2 py-0.5 rounded text-[11px] font-bold">
+                              "{kw}"
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
+                  )
+                })()}
               </div>
 
               {/* 4. SEND SOS ALERT BUTTON (Prominent at TOP) */}

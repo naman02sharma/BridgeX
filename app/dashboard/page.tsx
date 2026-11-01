@@ -12,8 +12,6 @@ import { DashboardStats } from "@/components/dashboard/stats"
 import { ActiveAlerts } from "@/components/active-alerts"
 import { MapView } from "@/components/map-view"
 import { RecentActivity } from "@/components/dashboard/recent-activity"
-import { AlertTrendsChart } from "@/components/dashboard/alert-trends-chart"
-import { ResponseTimeAnalytics } from "@/components/dashboard/response-time-analytics"
 import { ResponderStatus } from "@/components/dashboard/responder-status"
 
 export default function DashboardPage() {
@@ -99,21 +97,15 @@ export default function DashboardPage() {
                   <MapView />
                 </div>
               </div>
-
-              {/* Response Time Analytics */}
-              <ResponseTimeAnalytics />
             </div>
 
-            {/* Sidebar Operations: Responders, Activity & Trends */}
+            {/* Sidebar Operations: Responders & Activity */}
             <div className="space-y-6">
               {/* On-Duty Responder Teams */}
               <ResponderStatus />
 
               {/* Real-time Emergency Activity Log */}
               <RecentActivity />
-
-              {/* Incident Trends Chart */}
-              <AlertTrendsChart />
             </div>
           </div>
         </div>

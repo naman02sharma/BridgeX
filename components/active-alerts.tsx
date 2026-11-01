@@ -234,7 +234,13 @@ export function ActiveAlerts() {
     if (ageHours > 24 && !a.accepted_by) return false
 
     // 4. Department matching:
-    if (departmentFilter === "medical") {
+    if (isHospitalOrg) {
+      if (a.emergency_type !== "medical" && a.emergency_type !== "accident") return false
+    } else if (isFireOrg) {
+      if (a.emergency_type !== "fire") return false
+    } else if (isPoliceOrg) {
+      if (a.emergency_type !== "security" && a.emergency_type !== "police") return false
+    } else if (departmentFilter === "medical") {
       // Hospitals receive medical and accident emergencies
       if (a.emergency_type !== "medical" && a.emergency_type !== "accident") return false
     } else if (departmentFilter === "fire") {
@@ -382,6 +388,20 @@ export function ActiveAlerts() {
               return
             }
 
+            // DEPARTMENT SPECIFIC ISOLATION:
+            // Medical responder -> ONLY receive medical & accident alerts
+            if (isHospitalOrg && newAlert.emergency_type !== "medical" && newAlert.emergency_type !== "accident") {
+              return
+            }
+            // Fire responder -> ONLY receive fire alerts
+            if (isFireOrg && newAlert.emergency_type !== "fire") {
+              return
+            }
+            // Police responder -> ONLY receive security & police alerts
+            if (isPoliceOrg && newAlert.emergency_type !== "security" && newAlert.emergency_type !== "police") {
+              return
+            }
+
             if (decSet.has(newAlert.id)) return // Never show declined alerts
             if (newAlert.accepted_by) {
               const isMine = (user && newAlert.accepted_by === user.id) || accSet.has(newAlert.id)
@@ -393,6 +413,20 @@ export function ActiveAlerts() {
             }
           } else if (payload.eventType === "UPDATE") {
             const updatedAlert = payload.new as Alert
+
+            // DEPARTMENT SPECIFIC ISOLATION:
+            if (isHospitalOrg && updatedAlert.emergency_type !== "medical" && updatedAlert.emergency_type !== "accident") {
+              setAlerts((prev) => prev.filter((a) => a.id !== updatedAlert.id))
+              return
+            }
+            if (isFireOrg && updatedAlert.emergency_type !== "fire") {
+              setAlerts((prev) => prev.filter((a) => a.id !== updatedAlert.id))
+              return
+            }
+            if (isPoliceOrg && updatedAlert.emergency_type !== "security" && updatedAlert.emergency_type !== "police") {
+              setAlerts((prev) => prev.filter((a) => a.id !== updatedAlert.id))
+              return
+            }
             if (isVictimUser) {
               if (updatedAlert.status === "resolved" || updatedAlert.status === "cancelled") {
                 setAlerts((prev) => prev.filter((a) => a.id !== updatedAlert.id))
@@ -458,7 +492,7 @@ export function ActiveAlerts() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user?.id, isVictimUser, userPhone])
+  }, [user?.id, isVictimUser, userPhone, isHospitalOrg, isFireOrg, isPoliceOrg])
 
   const fetchAlerts = async () => {
     try {
@@ -533,7 +567,12 @@ export function ActiveAlerts() {
         const ageHours = (Date.now() - new Date(a.created_at).getTime()) / (1000 * 60 * 60)
         if (ageHours > 24 && !a.accepted_by) return false
 
-        // 4. If accepted by someone:
+        // 4. DEPARTMENT SPECIFIC ISOLATION on initial fetch:
+        if (isHospitalOrg && a.emergency_type !== "medical" && a.emergency_type !== "accident") return false
+        if (isFireOrg && a.emergency_type !== "fire") return false
+        if (isPoliceOrg && a.emergency_type !== "security" && a.emergency_type !== "police") return false
+
+        // 5. If accepted by someone:
         if (a.accepted_by) {
           const isMine = (user && a.accepted_by === user.id) || accSet.has(a.id)
           // Keep ONLY for the one who accepted, remove from everyone else!
@@ -1037,32 +1076,58 @@ export function ActiveAlerts() {
             : "Emergency dispatches tailored to your specialization. Siren sounds continuously until approved."}
         </p>
 
-        {/* Department / Organization Filter Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-muted/70 rounded-xl overflow-x-auto border">
-          {[
-            { id: "all", label: "All Incidents", icon: Radio, color: "text-foreground" },
-            { id: "fire", label: "Fire & Rescue (101)", icon: Flame, color: "text-orange-500" },
-            { id: "medical", label: "Medical & Trauma (102)", icon: Heart, color: "text-red-500" },
-            { id: "security", label: "Police & Security (112)", icon: Shield, color: "text-blue-500" },
-          ].map((tab) => {
-            const Icon = tab.icon
-            const active = departmentFilter === tab.id
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setDepartmentFilter(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                  active
-                    ? "bg-background text-foreground shadow-sm border"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className={`w-3.5 h-3.5 ${tab.color}`} />
-                {tab.label}
-              </button>
-            )
-          })}
-        </div>
+        {/* Department / Organization Console Banner or Filter Tabs */}
+        {isHospitalOrg ? (
+          <div className="flex items-center gap-2.5 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400">
+            <Heart className="w-4 h-4 text-red-500 flex-shrink-0 animate-pulse" />
+            <div className="flex-1">
+              <span className="font-bold">🏥 Medical & Trauma Emergency Dispatch Console (102 / 108)</span>
+              <span className="block text-[11px] text-muted-foreground mt-0.5">Strictly filtered to Hospital & Ambulance alerts. Audio siren triggers only for Medical emergencies.</span>
+            </div>
+          </div>
+        ) : isFireOrg ? (
+          <div className="flex items-center gap-2.5 p-3 bg-orange-500/10 border border-orange-500/30 rounded-xl text-xs font-semibold text-orange-600 dark:text-orange-400">
+            <Flame className="w-4 h-4 text-orange-500 flex-shrink-0 animate-pulse" />
+            <div className="flex-1">
+              <span className="font-bold">🚒 Fire & Rescue Emergency Dispatch Console (101)</span>
+              <span className="block text-[11px] text-muted-foreground mt-0.5">Strictly filtered to Fire Brigade dispatches. Audio siren triggers only for Fire emergencies.</span>
+            </div>
+          </div>
+        ) : isPoliceOrg ? (
+          <div className="flex items-center gap-2.5 p-3 bg-blue-500/10 border border-blue-500/30 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400">
+            <Shield className="w-4 h-4 text-blue-500 flex-shrink-0 animate-pulse" />
+            <div className="flex-1">
+              <span className="font-bold">🚓 Police & Law Enforcement Command Console (112)</span>
+              <span className="block text-[11px] text-muted-foreground mt-0.5">Strictly filtered to Security & Police dispatches. Audio siren triggers only for Law Enforcement emergencies.</span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 p-1 bg-muted/70 rounded-xl overflow-x-auto border">
+            {[
+              { id: "all", label: "All Incidents", icon: Radio, color: "text-foreground" },
+              { id: "fire", label: "Fire & Rescue (101)", icon: Flame, color: "text-orange-500" },
+              { id: "medical", label: "Medical & Trauma (102)", icon: Heart, color: "text-red-500" },
+              { id: "security", label: "Police & Security (112)", icon: Shield, color: "text-blue-500" },
+            ].map((tab) => {
+              const Icon = tab.icon
+              const active = departmentFilter === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setDepartmentFilter(tab.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                    active
+                      ? "bg-background text-foreground shadow-sm border"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${tab.color}`} />
+                  {tab.label}
+                </button>
+              )
+            })}
+          </div>
+        )}
       </Card>
 
       <div className="space-y-3">

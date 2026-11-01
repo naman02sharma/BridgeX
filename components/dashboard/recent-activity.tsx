@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Clock, Activity } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useGlobalTranslation } from "@/components/translation-provider"
+import { useSupabase } from "@/components/supabase-provider"
 import { supabase } from "@/lib/supabase"
 
 interface ActivityItem {
@@ -15,8 +16,25 @@ interface ActivityItem {
 
 export function RecentActivity() {
   const { t } = useGlobalTranslation()
+  const { user } = useSupabase()
   const [items, setItems] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
+
+  const orgName = ((user as any)?.organization || (user as any)?.user_metadata?.organization || "").toLowerCase()
+  const rawRole = ((user as any)?.role || (user as any)?.user_metadata?.responderRole || (user as any)?.user_metadata?.specificRole || "").toLowerCase()
+  const rawSpec = ((user as any)?.specialization || "").toLowerCase()
+
+  const isHospitalOrg = rawRole === "hospital" || rawSpec === "hospital" || rawRole === "medical" || rawSpec === "medical" || orgName.includes("hospital") || orgName.includes("medical") || orgName.includes("clinic")
+  const isFireOrg = rawRole === "fire" || rawSpec === "fire" || orgName.includes("fire") || orgName.includes("rescue")
+  const isPoliceOrg = rawRole === "police" || rawSpec === "police" || rawRole === "security" || rawSpec === "security" || orgName.includes("police") || orgName.includes("security")
+
+  const matchesDepartment = (alertType: string) => {
+    const et = (alertType || "").toLowerCase()
+    if (isHospitalOrg) return et === "medical" || et === "accident"
+    if (isFireOrg) return et === "fire"
+    if (isPoliceOrg) return et === "security" || et === "police"
+    return true
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -24,12 +42,14 @@ export function RecentActivity() {
         const res = await fetch('/api/alerts?limit=8')
         if (res.ok) {
           const data = await res.json()
-          const mapped = (data || []).map((a: any) => ({
-            id: a.id,
-            type: a.emergency_type || a.type || 'alert',
-            message: a.message || a.summary || a.original_message || 'Emergency Alert',
-            time: new Date(a.created_at || Date.now()).toLocaleString(),
-          }))
+          const mapped = (data || [])
+            .filter((a: any) => matchesDepartment(a.emergency_type || a.type || ''))
+            .map((a: any) => ({
+              id: a.id,
+              type: a.emergency_type || a.type || 'alert',
+              message: a.message || a.summary || a.original_message || 'Emergency Alert',
+              time: new Date(a.created_at || Date.now()).toLocaleString(),
+            }))
           setItems(mapped)
         } else {
           setItems([])
@@ -56,9 +76,12 @@ export function RecentActivity() {
         },
         (payload) => {
           const newAlert = payload.new as any
+          const alertType = newAlert.emergency_type || 'alert'
+          if (!matchesDepartment(alertType)) return
+
           const newItem: ActivityItem = {
             id: newAlert.id,
-            type: newAlert.emergency_type || 'alert',
+            type: alertType,
             message: newAlert.message || newAlert.original_message || 'Emergency Alert',
             time: new Date(newAlert.created_at || Date.now()).toLocaleString(),
           }

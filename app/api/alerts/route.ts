@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     // Auto-detect emergency type and target organization from text/translation
     const detected = classifyEmergency(rawMessage, translatedMessage)
-    const finalEmergencyType = (emergencyType && emergencyType !== 'other')
+    const finalEmergencyType = (emergencyType && emergencyType !== 'other' && emergencyType !== 'auto')
       ? emergencyType
       : (detected.category !== 'other' ? detected.category : 'medical')
 
