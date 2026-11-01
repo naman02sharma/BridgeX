@@ -24,8 +24,11 @@ export interface Session {
 
 // Convert Supabase user to our User type
 export function convertSupabaseUser(supabaseUser: SupabaseUser, profile?: any, responder?: any): User {
-  const role = profile?.role || supabaseUser.user_metadata?.role || 'user'
-  const specs = responder?.specializations || (profile?.role && profile.role !== 'user' ? [profile.role] : [])
+  const metaRole = supabaseUser.user_metadata?.specificRole || supabaseUser.user_metadata?.responderRole
+  const role = (profile?.role && profile.role !== 'responder')
+    ? profile.role
+    : (metaRole || profile?.role || supabaseUser.user_metadata?.role || 'user')
+  const specs = responder?.specializations || (role !== 'user' ? [role] : [])
   const primarySpec = specs[0] || (role !== 'user' ? role : undefined)
 
   return {
@@ -49,11 +52,25 @@ export const signUp = async (
   password: string,
   metadata?: { name?: string; role?: UserRole; phone?: string; organization?: string }
 ) => {
+  const rawRole = (metadata?.role as string) || "user"
+  const isCitizen = rawRole === "user" || rawRole === "victim"
+  // Map base role to 'user' or 'responder' so that database triggers with old
+  // CHECK (role IN ('user', 'responder', 'admin')) constraints never fail with "Database error saving new user"
+  const baseRole = isCitizen ? "user" : "responder"
+
+  const authData = {
+    ...metadata,
+    role: baseRole,
+    responderRole: rawRole,
+    specificRole: rawRole,
+    specialization: !isCitizen ? rawRole : undefined,
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: metadata,
+      data: authData,
     },
   })
 
@@ -61,17 +78,32 @@ export const signUp = async (
 
   if (data?.user?.id) {
     try {
-      await supabase.from("profiles").upsert({
+      // First attempt to upsert with the specific role
+      const { error: profErr } = await supabase.from("profiles").upsert({
         id: data.user.id,
         email,
         name: metadata?.name || null,
-        role: metadata?.role || "user",
+        role: rawRole,
         organization: metadata?.organization || null,
         phone: metadata?.phone || null,
         created_at: new Date().toISOString(),
       })
 
-      if (metadata?.role && metadata.role !== "user") {
+      // If specific role was rejected by check constraint, fallback to baseRole
+      if (profErr) {
+        console.warn("Profiles upsert with specific role rejected, falling back to baseRole:", profErr.message)
+        await supabase.from("profiles").upsert({
+          id: data.user.id,
+          email,
+          name: metadata?.name || null,
+          role: baseRole,
+          organization: metadata?.organization || null,
+          phone: metadata?.phone || null,
+          created_at: new Date().toISOString(),
+        })
+      }
+
+      if (!isCitizen) {
         const roleSpecs: Record<string, string[]> = {
           hospital: ["medical", "trauma", "first-aid", "hospital"],
           fire: ["fire", "rescue", "firefighter"],
@@ -80,11 +112,11 @@ export const signUp = async (
           ngo: ["support", "rescue", "medical"],
           responder: ["medical", "fire", "security", "rescue", "first-aid", "trauma"],
         }
-        const specs = roleSpecs[metadata.role] || ["support", "first-aid", "rescue"]
+        const specs = roleSpecs[rawRole] || ["support", "first-aid", "rescue"]
         try {
           await supabase.from("responders").upsert({
             user_id: data.user.id,
-            organization: metadata.organization || metadata.name || "Emergency Services",
+            organization: metadata?.organization || metadata?.name || "Emergency Services",
             specializations: specs,
             response_radius: 30,
             verification_status: "verified",

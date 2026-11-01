@@ -36,7 +36,7 @@ export function LoginForm() {
     try {
       const data = await signIn(email, password)
       const user = data?.user
-      let userRole = user?.user_metadata?.role || "user"
+      let userRole = user?.user_metadata?.specificRole || user?.user_metadata?.responderRole || user?.user_metadata?.role || "user"
       let userPhone = user?.user_metadata?.phone || ""
       let userName = user?.user_metadata?.name || ""
 
@@ -48,7 +48,7 @@ export function LoginForm() {
             .select("role, phone, name")
             .eq("id", user.id)
             .maybeSingle()
-          if (profile?.role) userRole = profile.role
+          if (profile?.role && profile.role !== "responder") userRole = profile.role
           if (profile?.phone) userPhone = profile.phone
           if (profile?.name) userName = profile.name
         } catch (err) {
