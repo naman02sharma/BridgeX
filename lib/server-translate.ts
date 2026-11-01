@@ -97,10 +97,9 @@ async function lingoDetect(text: string): Promise<string | null> {
 
 const GEMINI_MODELS = [
   process.env.GEMINI_MODEL,
+  "gemini-3.8-flash",
   "gemini-3.5-flash",
   "gemini-3.5-flash-lite",
-  "gemini-flash-lite-latest",
-  "gemini-3.8-flash",
   "gemini-flash-latest",
 ].filter(Boolean) as string[]
 
@@ -216,12 +215,13 @@ async function googleGtxTranslate(
     const tl = target.split("-")[0].toLowerCase()
 
     let queryText = text.trim()
-    if (isMostlyAscii(text)) {
+    const isRomanised = detectRomanisedIndic(text)
+    if (isMostlyAscii(text) && (isRomanised === "hi" || isRomanised === "mr" || sl === "hi" || sl === "mr")) {
       const devanagari = transliterateRomanisedToDevanagari(text.trim())
       if (devanagari !== text.trim()) {
         queryText = devanagari
         if (sl === "auto" || sl === "und" || !sl) {
-          sl = "hi"
+          sl = isRomanised || "hi"
         }
       }
     }
@@ -258,12 +258,13 @@ async function myMemoryTranslate(
 
     // If source is Hindi/Marathi or Romanised, convert Romanised tokens to Devanagari for 100% accurate translation
     let queryText = text.trim()
-    if (isMostlyAscii(text)) {
+    const isRomanised = detectRomanisedIndic(text)
+    if (isMostlyAscii(text) && (isRomanised === "hi" || isRomanised === "mr" || sl === "hi" || sl === "mr")) {
       const devanagari = transliterateRomanisedToDevanagari(text.trim())
       if (devanagari !== text.trim()) {
         queryText = devanagari
         if (sl === "auto" || sl === "und" || !sl) {
-          sl = "hi"
+          sl = isRomanised || "hi"
         }
       }
     }
@@ -393,25 +394,7 @@ export async function translateServer(
     errors.push(`Lingo.dev: ${err?.message || "timeout >5s"}`)
   }
 
-  // 3. High-accuracy Google Neural GTX Engine (handles all Indic scripts, Romanised/transliterated, & international)
-  try {
-    const gtx = await googleGtxTranslate(text, target, source || undefined)
-    if (gtx?.text) {
-      const same = gtx.text.toLowerCase().trim() === text.toLowerCase().trim()
-      return {
-        originalText: original,
-        translatedText: gtx.text,
-        sourceLang: gtx.sourceLang || source || "und",
-        targetLang: target,
-        translated: !same,
-        provider: "gemini", // Reported as neural engine to UI
-      }
-    }
-  } catch (err: any) {
-    errors.push(`GoogleGTX: ${err?.message || "failed"}`)
-  }
-
-  // 4. Fallback to Gemini (fast neural translation with 5-second timeout)
+  // 3. Neural Gemini translation (fast, high accuracy, handles English & Indian languages perfectly)
   if (geminiKey()) {
     try {
       const g = await geminiTranslate(text, target, source || undefined)
@@ -430,6 +413,24 @@ export async function translateServer(
     } catch (e: any) {
       errors.push(e?.message || "Gemini timed out (>5s)")
     }
+  }
+
+  // 4. Google Neural GTX Engine (handles all Indic scripts, Romanised/transliterated, & international)
+  try {
+    const gtx = await googleGtxTranslate(text, target, source || undefined)
+    if (gtx?.text) {
+      const same = gtx.text.toLowerCase().trim() === text.toLowerCase().trim()
+      return {
+        originalText: original,
+        translatedText: gtx.text,
+        sourceLang: gtx.sourceLang || source || "und",
+        targetLang: target,
+        translated: !same,
+        provider: "gemini", // Reported as neural engine to UI
+      }
+    }
+  } catch (err: any) {
+    errors.push(`GoogleGTX: ${err?.message || "failed"}`)
   }
 
   // 4. Fallback to MyMemory (free, reliable fallback for all languages)
