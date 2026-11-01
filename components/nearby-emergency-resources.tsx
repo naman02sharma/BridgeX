@@ -48,9 +48,9 @@ export function NearbyEmergencyResources({
         return
       }
 
-      // Secondary fallback to /api/places with resolved or regional location
-      const fallbackLat = result.userLocation?.lat || 19.0760
-      const fallbackLon = result.userLocation?.lon || 72.8777
+      // Secondary fallback to /api/places with resolved or Panvel location
+      const fallbackLat = result.userLocation?.lat || 18.9894
+      const fallbackLon = result.userLocation?.lon || 73.1175
       try {
         const res = await fetch(`/api/places?lat=${fallbackLat}&lng=${fallbackLon}&radius=${radiusMeters}`)
         if (res.ok) {

@@ -181,6 +181,33 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: false, places: [], error: "Valid lat and lon are required" }, { status: 400 })
   }
 
+  // Handle server-side reverse geocoding request with User-Agent
+  if (searchParams.get("reverse")) {
+    try {
+      const revRes = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+        {
+          headers: { "User-Agent": "BridgeX/2.0 (Emergency Response App)" },
+          signal: AbortSignal.timeout(4000),
+        }
+      )
+      if (revRes.ok) {
+        const revData = await revRes.json()
+        return NextResponse.json({
+          success: true,
+          display_name: revData.display_name,
+          address: revData.address,
+        })
+      }
+    } catch (e: any) {
+      console.warn("[places/reverse] Nominatim failed:", e?.message)
+    }
+    return NextResponse.json({
+      success: true,
+      display_name: `Location: ${lat.toFixed(4)}, ${lon.toFixed(4)}`,
+    })
+  }
+
   const key = `${lat.toFixed(3)}:${lon.toFixed(3)}:${radius}`
   const hit = cache.get(key)
   if (hit && Date.now() - hit.at < CACHE_TTL) {

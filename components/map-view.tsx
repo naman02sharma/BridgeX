@@ -7,6 +7,7 @@ import { MapPin, Navigation, Loader2, Hospital, Flame, Shield, Stethoscope } fro
 import { Badge } from "@/components/ui/badge"
 import dynamic from "next/dynamic"
 import { supabase } from "@/lib/supabase"
+import { useSupabase } from "@/components/supabase-provider"
 import { getUserLocation, calculateDistance, formatDistance } from "@/lib/geolocation"
 import { useGlobalTranslation } from "@/components/translation-provider"
 
@@ -41,28 +42,32 @@ interface FacilityMarker {
 
 export function MapView() {
   const { t } = useGlobalTranslation()
+  const { user } = useSupabase()
   const [userLocation, setUserLocation] = useState<Location | null>(null)
   const [loading, setLoading] = useState(true)
   const [facilities, setFacilities] = useState<FacilityMarker[]>([])
   const [activeCategory, setActiveCategory] = useState<string>("all")
+  const [activeAreaName, setActiveAreaName] = useState<string>("Panvel, Raigad")
 
-  // Auto-acquire user location on mount
+  // Auto-acquire user location on mount (using browser GPS, phone number, or account location)
   useEffect(() => {
     let mounted = true
     const initLocation = async () => {
       setLoading(true)
       try {
-        const coords = await getUserLocation()
+        const coords = await getUserLocation(false, user?.phone)
         if (mounted && coords) {
           const loc = { lat: coords.lat, lng: coords.lng }
           setUserLocation(loc)
+          setActiveAreaName(coords.city || (Math.abs(coords.lat - 18.9894) < 0.08 ? "Panvel, Raigad" : "Current Location"))
           await loadMapResources(loc)
         }
       } catch (err) {
         console.warn("Location init error:", err)
-        const fallback = { lat: 19.0760, lng: 72.8777 }
+        const fallback = { lat: 18.9894, lng: 73.1175 }
         if (mounted) {
           setUserLocation(fallback)
+          setActiveAreaName("Panvel, Raigad")
           await loadMapResources(fallback)
         }
       } finally {
@@ -72,16 +77,35 @@ export function MapView() {
 
     initLocation()
     return () => { mounted = false }
-  }, [])
+  }, [user?.phone])
 
   // Manual refresh GPS location
   const handleRefreshLocation = async () => {
     setLoading(true)
     try {
       localStorage.removeItem("bridgex_user_coords")
-      const coords = await getUserLocation(true)
+      const coords = await getUserLocation(true, user?.phone)
       const loc = { lat: coords.lat, lng: coords.lng }
       setUserLocation(loc)
+      setActiveAreaName(coords.city || (Math.abs(coords.lat - 18.9894) < 0.08 ? "Panvel, Raigad" : "Current Location"))
+      await loadMapResources(loc)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Quick area selection
+  const handleSelectArea = async (area: { id: string; label: string; lat: number; lng: number }) => {
+    setLoading(true)
+    try {
+      localStorage.setItem("bridgex_selected_city", area.label.split("(")[0].trim())
+      localStorage.setItem(
+        "bridgex_user_coords",
+        JSON.stringify({ lat: area.lat, lng: area.lng, city: area.label, source: "account", time: Date.now() })
+      )
+      const loc = { lat: area.lat, lng: area.lng }
+      setUserLocation(loc)
+      setActiveAreaName(area.label)
       await loadMapResources(loc)
     } finally {
       setLoading(false)
@@ -242,6 +266,45 @@ export function MapView() {
           {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5" />}
           <span className="text-xs">Locate Me</span>
         </Button>
+      </div>
+
+      {/* Region / City Quick Selector */}
+      <div className="px-4 py-2 bg-muted/20 border-b flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-[11px] font-bold text-muted-foreground mr-1 uppercase tracking-wider">
+            Detected / Quick Region:
+          </span>
+          {[
+            { id: "panvel", label: "Panvel (Raigad)", lat: 18.9894, lng: 73.1175 },
+            { id: "navimumbai", label: "Navi Mumbai", lat: 19.0330, lng: 73.0297 },
+            { id: "mumbai", label: "Mumbai", lat: 18.9388, lng: 72.8354 },
+            { id: "thane", label: "Thane", lat: 19.2183, lng: 72.9781 },
+          ].map((area) => {
+            const isSelected =
+              userLocation &&
+              Math.abs(userLocation.lat - area.lat) < 0.04 &&
+              Math.abs(userLocation.lng - area.lng) < 0.04
+            return (
+              <button
+                key={area.id}
+                type="button"
+                onClick={() => handleSelectArea(area)}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all border ${
+                  isSelected
+                    ? "bg-red-600 text-white border-red-600 shadow-sm"
+                    : "bg-background text-foreground hover:bg-muted border-border"
+                }`}
+              >
+                {area.label}
+              </button>
+            )
+          })}
+        </div>
+        {userLocation && (
+          <span className="text-[11px] text-muted-foreground font-medium">
+            Active: <strong className="text-foreground">{activeAreaName}</strong> ({userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)})
+          </span>
+        )}
       </div>
 
       {/* Map Canvas */}

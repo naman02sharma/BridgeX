@@ -362,7 +362,7 @@ export function SOSInterfaceV2() {
   const getLocation = async (forceFresh = false) => {
     setLocationLoading(true)
     try {
-      const coords = await getUserLocation(forceFresh)
+      const coords = await getUserLocation(forceFresh, victimPhone)
       const newLoc = {
         lat: coords.lat,
         lng: coords.lng
@@ -373,8 +373,8 @@ export function SOSInterfaceV2() {
       }
       fetchNearbyEmergencyFacilities(newLoc.lat, newLoc.lng)
 
-      // Auto reverse-geocode area name
-      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLoc.lat}&lon=${newLoc.lng}&zoom=18&addressdetails=1`)
+      // Auto reverse-geocode area name via server route
+      fetch(`/api/places?reverse=1&lat=${newLoc.lat}&lon=${newLoc.lng}`)
         .then((r) => r.json())
         .then((data) => {
           if (data?.display_name) {
@@ -385,7 +385,7 @@ export function SOSInterfaceV2() {
         .catch(() => {})
     } catch (error) {
       console.warn("Could not get location:", error)
-      const fallbackLoc = { lat: 19.0760, lng: 72.8777 }
+      const fallbackLoc = { lat: 18.9894, lng: 73.1175 }
       setLocation(fallbackLoc)
       fetchNearbyEmergencyFacilities(fallbackLoc.lat, fallbackLoc.lng)
     } finally {

@@ -67,7 +67,7 @@ export async function getUserLocation(): Promise<{ lat: number; lon: number } | 
   } catch (err) {
     console.warn("Location error:", err)
   }
-  return { lat: 19.0760, lon: 72.8777 } // Reliable regional fallback (Mumbai / Thane)
+  return { lat: 18.9894, lon: 73.1175 } // Default to Panvel regional center
 }
 
 /**
