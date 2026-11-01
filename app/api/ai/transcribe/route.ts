@@ -62,10 +62,13 @@ export async function POST(req: Request) {
       const buffer = Buffer.from(arrayBuffer)
       base64Audio = buffer.toString("base64")
     } else {
-      const json = await req.json()
-      base64Audio = json.audio || ""
-      mimeType = json.mimeType || "audio/webm"
-      languageHint = json.languageHint || ""
+      let json: any = {}
+      try {
+        json = await req.json()
+      } catch {}
+      base64Audio = json?.audio || ""
+      mimeType = json?.mimeType || "audio/webm"
+      languageHint = json?.languageHint || ""
 
       // Strip data URL prefix if present
       if (base64Audio.includes(",")) {
