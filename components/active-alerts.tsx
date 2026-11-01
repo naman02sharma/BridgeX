@@ -1224,13 +1224,24 @@ export function ActiveAlerts() {
                   </div>
 
                   {alert.message && (
-                    <div className="mb-3 p-2 bg-muted/40 rounded-md space-y-1">
-                      <p className="text-xs text-card-foreground line-clamp-2 font-medium">
+                    <div className="mb-3 p-2.5 bg-blue-50/50 dark:bg-blue-950/20 rounded-lg border border-blue-200/60 dark:border-blue-900/60 space-y-1.5">
+                      <div className="flex items-center justify-between text-[11px] font-semibold text-blue-900 dark:text-blue-200">
+                        <span className="flex items-center gap-1">
+                          <Languages className="w-3.5 h-3.5 text-blue-600" />
+                          Emergency Dispatch Details:
+                        </span>
+                        {alert.language_code && (
+                          <Badge variant="outline" className="text-[10px] uppercase font-bold py-0 h-4">
+                            {alert.language_code} → EN
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-foreground font-bold leading-relaxed">
                         {alert.message}
                       </p>
                       {alert.original_message && alert.original_message !== alert.message && (
-                        <p className="text-[11px] text-muted-foreground italic line-clamp-1">
-                          Original ({alert.language_code || 'native'}): {alert.original_message}
+                        <p className="text-[11px] text-muted-foreground italic border-t pt-1">
+                          Native Transcription: <span className="font-medium text-foreground">{alert.original_message}</span>
                         </p>
                       )}
                     </div>

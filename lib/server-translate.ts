@@ -98,6 +98,8 @@ async function lingoDetect(text: string): Promise<string | null> {
 const GEMINI_MODELS = [
   process.env.GEMINI_MODEL,
   "gemini-3.8-flash",
+  "gemini-3.7-flash",
+  "gemini-3.6-flash",
   "gemini-3.5-flash",
   "gemini-3.5-flash-lite",
   "gemini-flash-latest",
@@ -345,7 +347,7 @@ export async function translateServer(
     }
   }
 
-  // 1. Instant offline emergency dictionary check (<1ms)
+  // 1. Instant offline emergency dictionary check for exact matching phrases (<1ms)
   const normKey = text.toLowerCase().trim()
   if (OFFLINE_EMERGENCY_DICTIONARY[normKey] && OFFLINE_EMERGENCY_DICTIONARY[normKey][target]) {
     const dictTranslation = OFFLINE_EMERGENCY_DICTIONARY[normKey][target]
@@ -356,21 +358,6 @@ export async function translateServer(
       targetLang: target,
       translated: dictTranslation.toLowerCase() !== normKey,
       provider: "offline-dict",
-    }
-  }
-
-  // Check substring match for emergency phrases (sorted by descending length)
-  const phrases = Object.keys(OFFLINE_EMERGENCY_DICTIONARY).sort((a, b) => b.length - a.length)
-  for (const phrase of phrases) {
-    if (phrase.length >= 8 && normKey.includes(phrase) && OFFLINE_EMERGENCY_DICTIONARY[phrase][target]) {
-      return {
-        originalText: original,
-        translatedText: OFFLINE_EMERGENCY_DICTIONARY[phrase][target],
-        sourceLang: source || "hi",
-        targetLang: target,
-        translated: true,
-        provider: "offline-dict",
-      }
     }
   }
 

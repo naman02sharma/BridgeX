@@ -608,19 +608,24 @@ export function SOSInterfaceV2() {
     setResetSignal((k) => k + 1)
   }
 
-  const handleVoiceTranscript = (transcript: string) => {
-    const trimmed = transcript?.trim() || ""
+  const handleVoiceTranscript = (transcriptText: string, directTranslation?: string) => {
+    const trimmed = transcriptText?.trim() || ""
     setMessage(trimmed)
     if (!trimmed) {
       setTranslatedEnglish("")
       setDetectedSourceLang("")
       return
     }
-    const script = detectIndicLanguage(trimmed)
-    if (script.lang) {
-      setDetectedSourceLang(script.lang)
+    if (directTranslation) {
+      setTranslatedEnglish(directTranslation)
     }
-    translateMessage(trimmed, script.lang || undefined)
+    const script = detectIndicLanguage(trimmed)
+    const detectedLang = script.lang || voiceLang.split("-")[0]
+    setDetectedSourceLang(detectedLang)
+
+    if (!directTranslation) {
+      translateMessage(trimmed, detectedLang)
+    }
   }
 
   const handleFileUpload = (files: any[]) => {
@@ -865,14 +870,18 @@ export function SOSInterfaceV2() {
                   Tap to speak in <strong>Marathi, Hindi, Bengali, Tamil, Telugu, English</strong>, or any Indian language. BridgeX automatically detects your language, translates it to English, and classifies the emergency department in real time.
                 </p>
 
-                {/* Voice Input with Auto-Detected Speech Engine */}
+                {/* Voice Input with Dual-Engine (Web Speech + Gemini Multimodal AI) */}
                 <div className="pt-1">
                   <VoiceInputV2
+                    onTranscript={(interim) => {
+                      // Live speech feedback while user is speaking
+                    }}
                     onFinalTranscript={handleVoiceTranscript}
                     onClear={handleClearMessage}
                     resetKey={resetSignal}
                     language={voiceLang}
                     languageName={supportedVoiceLanguages.find((l) => l.bcp47 === voiceLang)?.nativeName || "Any Language"}
+                    onLanguageChange={(newLang) => setVoiceLang(newLang)}
                   />
                 </div>
               </div>
