@@ -3,6 +3,8 @@
  * Fetches nearby hospitals, NGOs, emergency centers using OpenStreetMap Nominatim and Overpass API
  */
 
+import { getUserLocation as getBaseLocation } from "./geolocation"
+
 export interface NearbyPlace {
   id: string
   name: string
@@ -54,34 +56,18 @@ export function formatDistance(meters: number): string {
 }
 
 /**
- * Get user's current location
+ * Get user's current location with automatic IP and cache fallback
  */
 export async function getUserLocation(): Promise<{ lat: number; lon: number } | null> {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      console.warn('Geolocation not supported')
-      resolve(null)
-      return
+  try {
+    const coords = await getBaseLocation()
+    if (coords && typeof coords.lat === "number" && typeof coords.lng === "number") {
+      return { lat: coords.lat, lon: coords.lng }
     }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-        })
-      },
-      (error) => {
-        console.warn('Geolocation error:', error)
-        resolve(null)
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000, // Cache for 5 minutes
-      }
-    )
-  })
+  } catch (err) {
+    console.warn("Location error:", err)
+  }
+  return { lat: 19.0760, lon: 72.8777 } // Reliable regional fallback (Mumbai / Thane)
 }
 
 /**

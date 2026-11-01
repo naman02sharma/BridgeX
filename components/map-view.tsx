@@ -3,275 +3,271 @@
 import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { MapPin, Navigation, Loader2 } from "lucide-react"
+import { MapPin, Navigation, Loader2, Hospital, Flame, Shield, Stethoscope } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import dynamic from "next/dynamic"
 import { supabase } from "@/lib/supabase"
-import { calculateDistance, formatDistance } from "@/lib/geolocation"
+import { getUserLocation, calculateDistance, formatDistance } from "@/lib/geolocation"
 import { useGlobalTranslation } from "@/components/translation-provider"
 
 // Dynamically import the entire map component to avoid SSR issues
-const MapContent = dynamic(() => import("./map-content"), { ssr: false })
+const MapContent = dynamic(() => import("./map-content"), { 
+  ssr: false,
+  loading: () => (
+    <div className="h-[500px] w-full flex flex-col items-center justify-center bg-muted/10 gap-2">
+      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <span className="text-sm text-muted-foreground">Loading Emergency Map...</span>
+    </div>
+  )
+})
 
 interface Location {
   lat: number
   lng: number
 }
 
-interface Responder {
+interface FacilityMarker {
   id: string
   name: string
-  type: "hospital" | "ngo" | "volunteer"
+  type: string
   distance: string
+  distanceKm: number
   lat: number
   lng: number
   available: boolean
-  last_updated?: string
-  status?: "available" | "busy" | "responding"
+  phone?: string
+  address?: string
 }
 
 export function MapView() {
+  const { t } = useGlobalTranslation()
   const [userLocation, setUserLocation] = useState<Location | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [responders, setResponders] = useState<Responder[]>([])
+  const [loading, setLoading] = useState(true)
+  const [facilities, setFacilities] = useState<FacilityMarker[]>([])
+  const [activeCategory, setActiveCategory] = useState<string>("all")
 
+  // Auto-acquire user location on mount
   useEffect(() => {
-    // Subscribe to realtime responder location updates
-    const channel = supabase
-      .channel('responder_locations')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'responder_locations'
-        },
-        (payload) => {
-          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-            if (userLocation) {
-              fetchNearbyResponders(userLocation)
-            }
-          }
+    let mounted = true
+    const initLocation = async () => {
+      setLoading(true)
+      try {
+        const coords = await getUserLocation()
+        if (mounted && coords) {
+          const loc = { lat: coords.lat, lng: coords.lng }
+          setUserLocation(loc)
+          await loadMapResources(loc)
         }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
+      } catch (err) {
+        console.warn("Location init error:", err)
+        const fallback = { lat: 19.0760, lng: 72.8777 }
+        if (mounted) {
+          setUserLocation(fallback)
+          await loadMapResources(fallback)
+        }
+      } finally {
+        if (mounted) setLoading(false)
+      }
     }
-  }, [userLocation])
 
-  const getLocation = () => {
+    initLocation()
+    return () => { mounted = false }
+  }, [])
+
+  // Manual refresh GPS location
+  const handleRefreshLocation = async () => {
     setLoading(true)
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const location = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          }
-          setUserLocation(location)
-          fetchNearbyResponders(location)
-          setLoading(false)
-        },
-        (error) => {
-          console.warn(`Could not get your location (${error.message || error.code}); using a default location.`)
-          // Use default location for demo
-          const defaultLocation = { lat: 40.7128, lng: -74.006 }
-          setUserLocation(defaultLocation)
-          fetchNearbyResponders(defaultLocation)
-          setLoading(false)
-        },
-      )
-    } else {
-      const defaultLocation = { lat: 40.7128, lng: -74.006 }
-      setUserLocation(defaultLocation)
-      fetchNearbyResponders(defaultLocation)
+    try {
+      localStorage.removeItem("bridgex_user_coords")
+      const coords = await getUserLocation()
+      const loc = { lat: coords.lat, lng: coords.lng }
+      setUserLocation(loc)
+      await loadMapResources(loc)
+    } finally {
       setLoading(false)
     }
   }
 
-  const fetchNearbyResponders = async (location: Location) => {
+  // Load both real nearby emergency facilities and active online responders
+  const loadMapResources = async (location: Location) => {
+    const combined: FacilityMarker[] = []
+    const seen = new Set<string>()
+
+    // 1. Fetch real nearby hospitals, fire stations, police stations via /api/places
     try {
-      // First, test basic Supabase connectivity
-      const { data: testData, error: testError } = await supabase
-        .from('responders')
-        .select('count')
-        .limit(1)
-
-      if (testError) {
-        console.error('Supabase connectivity test failed:', testError)
-        throw new Error(`Supabase connection failed: ${testError.message}`)
+      const placesRes = await fetch(`/api/places?lat=${location.lat}&lon=${location.lng}&radius=20000`)
+      if (placesRes.ok) {
+        const data = await placesRes.json()
+        if (Array.isArray(data.places)) {
+          for (const p of data.places) {
+            const dist = calculateDistance(location.lat, location.lng, p.lat, p.lon)
+            seen.add(p.id)
+            combined.push({
+              id: p.id,
+              name: p.name,
+              type: p.category || "emergency",
+              distance: formatDistance(dist),
+              distanceKm: dist,
+              lat: p.lat,
+              lng: p.lon,
+              available: true,
+              phone: p.phone,
+              address: p.address
+            })
+          }
+        }
       }
+    } catch (placesErr) {
+      console.warn("Places fetch fallback:", placesErr)
+    }
 
-      // Fetch real responder data from Supabase
-      const { data: responderData, error } = await supabase
+    // 2. Fetch live responder locations from Supabase
+    try {
+      const { data: responderData } = await supabase
         .from('responder_locations')
         .select(`
           id,
           responder_id,
           latitude,
           longitude,
-          last_updated,
           status,
-          accuracy,
-          responders!inner (
+          responders (
             id,
             organization,
             specializations,
-            verification_status,
-            active,
-            user_id,
-            profiles (
-              email
-            )
+            active
           )
         `)
         .eq('active', true)
-        .eq('responders.verification_status', 'verified')
-        .eq('responders.active', true)
+        .limit(30)
 
-      if (error) {
-        console.error('Error fetching responder locations:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code,
-          fullError: error
-        })
-
-        // Try a simpler query to see if the table exists
-        const { data: simpleData, error: simpleError } = await supabase
-          .from('responder_locations')
-          .select('*')
-          .limit(1)
-
-        if (simpleError) {
-          console.error('Even simple query failed:', simpleError)
-        } else {
+      if (responderData && responderData.length > 0) {
+        for (const r of responderData as any[]) {
+          const rId = `resp-${r.id}`
+          if (!seen.has(rId)) {
+            const dist = calculateDistance(location.lat, location.lng, r.latitude, r.longitude)
+            seen.add(rId)
+            combined.push({
+              id: rId,
+              name: r.responders?.organization || "Emergency Responder",
+              type: r.responders?.specializations?.[0] || "responder",
+              distance: formatDistance(dist),
+              distanceKm: dist,
+              lat: r.latitude,
+              lng: r.longitude,
+              available: r.status === "available"
+            })
+          }
         }
-
-        // Fallback to API call if Supabase fails
-        const response = await fetch(`/api/responders?lat=${location.lat}&lng=${location.lng}`)
-        const data = await response.json()
-        setResponders(data.responders || [])
-        return
       }
+    } catch {}
 
-      // Transform data and calculate distances
-      const transformedResponders: Responder[] = (responderData || []).map((item: any) => {
-        const distance = calculateDistance(
-          location.lat,
-          location.lng,
-          item.latitude,
-          item.longitude
-        )
-
-        return {
-          id: item.responders?.id || item.id,
-          name: item.responders?.organization || 'Unknown Responder',
-          type: item.responders?.specializations?.[0] || 'responder',
-          distance: formatDistance(distance),
-          lat: item.latitude,
-          lng: item.longitude,
-          available: item.responders?.active && item.status === 'available',
-          last_updated: item.last_updated,
-          status: item.status
-        }
-      }).filter((responder: Responder) => responder.available)
-
-      setResponders(transformedResponders)
-    } catch (error) {
-      console.error('Error fetching responders:', error)
-      // Fallback to API call
-      try {
-        const response = await fetch(`/api/responders?lat=${location.lat}&lng=${location.lng}`)
-        const data = await response.json()
-        setResponders(data.responders || [])
-      } catch (apiError) {
-        console.error('API fallback failed:', apiError)
-      }
-    }
+    combined.sort((a, b) => a.distanceKm - b.distanceKm)
+    setFacilities(combined)
   }
 
-  useEffect(() => {
-    getLocation()
-  }, [])
+  // Filter facilities by selected category tab
+  const filteredFacilities = facilities.filter((f) => {
+    if (activeCategory === "all") return true
+    if (activeCategory === "hospital") return f.type === "hospital" || f.type === "medical"
+    if (activeCategory === "fire") return f.type === "fire_station" || f.type === "fire"
+    if (activeCategory === "police") return f.type === "police" || f.type === "security"
+    if (activeCategory === "clinic") return f.type === "clinic" || f.type === "pharmacy" || f.type === "doctors"
+    return true
+  })
 
-  const { t } = useGlobalTranslation()
+  const hospitalCount = facilities.filter(f => f.type === "hospital" || f.type === "medical").length
+  const fireCount = facilities.filter(f => f.type === "fire_station" || f.type === "fire").length
+  const policeCount = facilities.filter(f => f.type === "police" || f.type === "security").length
 
   return (
-    <Card className="overflow-hidden border-2 relative z-0 isolate">
-      <div className="p-4 bg-muted/30 border-b flex items-center justify-between">
+    <Card className="overflow-hidden border-2 relative z-0 isolate shadow-md">
+      {/* Header Bar */}
+      <div className="p-4 bg-muted/40 border-b flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-primary" />
-          <span className="font-semibold text-foreground">{t('map', 'Live Map')}</span>
+          <MapPin className="w-5 h-5 text-red-600 animate-pulse" />
+          <span className="font-bold text-foreground text-base">{t('map', 'Live Emergency Map')}</span>
           {userLocation && (
-            <Badge variant="secondary" className="ml-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
-              Location Active
+            <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full mr-1.5 animate-pulse" />
+              GPS Live
             </Badge>
           )}
         </div>
-        <Button size="sm" onClick={getLocation} disabled={loading}>
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation className="w-4 h-4" />}
+
+        {/* Category Filter Pills */}
+        <div className="flex items-center gap-1 overflow-x-auto text-xs">
+          <button
+            type="button"
+            onClick={() => setActiveCategory("all")}
+            className={`px-2.5 py-1 rounded-full font-medium transition-colors ${
+              activeCategory === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+          >
+            All ({facilities.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory("hospital")}
+            className={`px-2.5 py-1 rounded-full font-medium transition-colors flex items-center gap-1 ${
+              activeCategory === "hospital" ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+          >
+            <Hospital className="w-3 h-3" />
+            Hospitals ({hospitalCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory("fire")}
+            className={`px-2.5 py-1 rounded-full font-medium transition-colors flex items-center gap-1 ${
+              activeCategory === "fire" ? "bg-orange-600 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+          >
+            <Flame className="w-3 h-3" />
+            Fire ({fireCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveCategory("police")}
+            className={`px-2.5 py-1 rounded-full font-medium transition-colors flex items-center gap-1 ${
+              activeCategory === "police" ? "bg-blue-600 text-white" : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+          >
+            <Shield className="w-3 h-3" />
+            Police ({policeCount})
+          </button>
+        </div>
+
+        <Button size="sm" variant="outline" onClick={handleRefreshLocation} disabled={loading} className="gap-1.5">
+          {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5" />}
+          <span className="text-xs">Locate Me</span>
         </Button>
       </div>
 
-      {/* OpenStreetMap Container */}
-      <div className="relative h-[500px] w-full z-0 isolate">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+      {/* Map Canvas */}
+      <div className="relative h-[520px] w-full z-0 isolate">
+        {loading && !userLocation && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 z-20 gap-2">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
-        )}
-        {!userLocation && !loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-muted/10">
-            <div className="text-center">
-              <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">{t('enableLocation', 'Enable location to view map')}</p>
-              <Button onClick={getLocation}>
-                <Navigation className="w-4 h-4 mr-2" />
-                {t('getLocation', 'Get Location')}
-              </Button>
-            </div>
+            <p className="text-sm font-medium text-muted-foreground">Acquiring GPS location...</p>
           </div>
         )}
 
         {userLocation && (
-          <MapContent userLocation={userLocation} responders={responders} />
-        )}
-
-        {/* Legend */}
-        {userLocation && (
-          <div className="absolute bottom-4 left-4 bg-card border rounded-lg p-3 shadow-lg z-20">
-            <div className="text-xs font-semibold mb-2 text-card-foreground">Legend</div>
-            <div className="space-y-1 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full" />
-                <span className="text-muted-foreground">Your Location</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full" />
-                <span className="text-muted-foreground">Hospital</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-orange-500 rounded-full" />
-                <span className="text-muted-foreground">NGO</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-purple-500 rounded-full" />
-                <span className="text-muted-foreground">Volunteers</span>
-              </div>
-            </div>
-          </div>
+          <MapContent userLocation={userLocation} responders={filteredFacilities} />
         )}
       </div>
 
-      {/* Quick Info */}
-      <div className="p-4 bg-muted/30 border-t">
-        <div className="text-sm text-muted-foreground">
-          Showing {responders.length} verified responders nearby • Powered by OpenStreetMap
+      {/* Status Footer */}
+      <div className="p-3 bg-muted/30 border-t flex items-center justify-between text-xs text-muted-foreground">
+        <div>
+          Showing <span className="font-semibold text-foreground">{filteredFacilities.length}</span> emergency centers within 20 km range
+        </div>
+        <div className="flex items-center gap-2">
+          <span>🏥 Hospital</span>
+          <span>🚒 Fire</span>
+          <span>🚓 Police</span>
+          <span>⚕️ Clinic</span>
         </div>
       </div>
     </Card>

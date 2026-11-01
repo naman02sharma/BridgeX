@@ -42,15 +42,42 @@ export function NearbyEmergencyResources({
       
       const result = await getNearbyEmergencyResources(radiusMeters)
       
-      if (!result.success) {
-        setError(result.error || 'Failed to fetch nearby resources')
-        setPlaces([])
+      if (result.success && result.places.length > 0) {
+        setPlaces(result.places)
         setUserLocation(result.userLocation)
         return
       }
 
-      setPlaces(result.places)
-      setUserLocation(result.userLocation)
+      // Secondary fallback to /api/nearby
+      if (result.userLocation) {
+        try {
+          const res = await fetch(`/api/nearby?lat=${result.userLocation.lat}&lng=${result.userLocation.lon}&radius=20`)
+          if (res.ok) {
+            const data = await res.json()
+            if (Array.isArray(data.responders) && data.responders.length > 0) {
+              const mapped: NearbyPlace[] = data.responders.map((r: any) => ({
+                id: r.id,
+                name: r.name,
+                category: r.type as any,
+                lat: r.lat,
+                lon: r.lng,
+                distance: r.distanceKm ? Math.round(r.distanceKm * 1000) : undefined,
+                address: r.address,
+                phone: r.contact,
+                emergency: true
+              }))
+              setPlaces(mapped)
+              setUserLocation(result.userLocation)
+              return
+            }
+          }
+        } catch {}
+      }
+
+      if (!result.success) {
+        setError(result.error || 'Failed to fetch nearby resources')
+        setPlaces([])
+      }
     } catch (err) {
       console.warn('Error fetching resources:', err)
       setError(err instanceof Error ? err.message : 'Unknown error')

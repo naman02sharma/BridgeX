@@ -41,6 +41,7 @@ import { useGlobalTranslation } from "@/components/translation-provider"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase"
 import { authFetch } from "@/lib/auth-fetch"
+import { getUserLocation } from "@/lib/geolocation"
 import { speechLocales, supportedVoiceLanguages, detectIndicLanguage } from "@/lib/language-scripts"
 import { fetchNearbyPlaces, type NearbyPlace, formatDistance, getCategoryIcon } from "@/lib/geolocation-service"
 import { classifyEmergency, type DetectedEmergency } from "@/lib/emergency-classifier"
@@ -305,21 +306,14 @@ export function SOSInterfaceV2() {
   const getLocation = async () => {
     setLocationLoading(true)
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
-        })
-      })
-      
+      const coords = await getUserLocation()
       const newLoc = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
+        lat: coords.lat,
+        lng: coords.lng
       }
       setLocation(newLoc)
-      if (position.coords.accuracy) {
-        setLocationAccuracy(Math.round(position.coords.accuracy))
+      if (coords.accuracy) {
+        setLocationAccuracy(Math.round(coords.accuracy))
       }
       fetchNearbyEmergencyFacilities(newLoc.lat, newLoc.lng)
 
@@ -335,13 +329,9 @@ export function SOSInterfaceV2() {
         .catch(() => {})
     } catch (error) {
       console.warn("Could not get location:", error)
-      toast({
-        title: t("locationError", "Location Error"),
-        description: t("locationErrorDesc", "Using approximate location"),
-        variant: "default"
-      })
-      // Use default location
-      setLocation({ lat: 0, lng: 0 })
+      const fallbackLoc = { lat: 19.0760, lng: 72.8777 }
+      setLocation(fallbackLoc)
+      fetchNearbyEmergencyFacilities(fallbackLoc.lat, fallbackLoc.lng)
     } finally {
       setLocationLoading(false)
     }
@@ -397,7 +387,9 @@ export function SOSInterfaceV2() {
 
       // Auto-detect emergency type and organization routing
       const detected = classifyEmergency(message, translatedEnglish)
-      const finalEmergencyType = detected.category !== "other" ? detected.category : (selectedType || "medical")
+      const finalEmergencyType = (selectedType && selectedType !== "other")
+        ? selectedType
+        : (detected.category !== "other" ? detected.category : "medical")
 
       // Resolved address automatically from GPS Geolocation
       const resolvedAddress = geocodedArea || detailedAddress || (location ? `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}` : "GPS Geolocation Acquired")

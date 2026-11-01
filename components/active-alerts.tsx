@@ -128,6 +128,18 @@ const sirenSound = {
   }
 }
 
+// Global gesture listener to unlock Web Audio API on first user interaction
+if (typeof window !== "undefined") {
+  const unlockAudio = () => {
+    if (sirenSound.ctx && sirenSound.ctx.state === "suspended") {
+      sirenSound.ctx.resume().catch(() => {})
+    }
+  }
+  window.addEventListener("click", unlockAudio, { passive: true })
+  window.addEventListener("touchstart", unlockAudio, { passive: true })
+  window.addEventListener("keydown", unlockAudio, { passive: true })
+}
+
 export function ActiveAlerts() {
   const { user } = useSupabase()
   const { toast } = useToast()
@@ -171,12 +183,19 @@ export function ActiveAlerts() {
   const userPhone = (user as any)?.phone || (user as any)?.user_metadata?.phone || ""
 
   // Responder specialization (fire / medical / security / all)
-  const userSpecialization = (user as any)?.specialization || (user as any)?.organization_type || userRole
-  const defaultDept = userSpecialization === "fire"
+  const orgName = ((user as any)?.organization || (user as any)?.user_metadata?.organization || "").toLowerCase()
+  const rawRole = ((user as any)?.role || (user as any)?.user_metadata?.responderRole || (user as any)?.user_metadata?.specificRole || "").toLowerCase()
+  const rawSpec = ((user as any)?.specialization || "").toLowerCase()
+
+  const isHospitalOrg = rawRole === "hospital" || rawSpec === "hospital" || rawRole === "medical" || rawSpec === "medical" || orgName.includes("hospital") || orgName.includes("medical") || orgName.includes("clinic")
+  const isFireOrg = rawRole === "fire" || rawSpec === "fire" || orgName.includes("fire") || orgName.includes("rescue")
+  const isPoliceOrg = rawRole === "police" || rawSpec === "police" || rawRole === "security" || rawSpec === "security" || orgName.includes("police") || orgName.includes("security")
+
+  const defaultDept = isFireOrg
     ? "fire"
-    : userSpecialization === "hospital" || userSpecialization === "medical"
+    : isHospitalOrg
     ? "medical"
-    : userSpecialization === "police" || userSpecialization === "security"
+    : isPoliceOrg
     ? "security"
     : "all"
 
@@ -185,22 +204,24 @@ export function ActiveAlerts() {
   // Automatically adapt department filter when responder logs in
   useEffect(() => {
     if (!user) return
-    const role = (user as any)?.role
-    const spec = (user as any)?.specialization || role
-    if (spec === "hospital" || spec === "medical") {
-      setDepartmentFilter("medical")
-    } else if (spec === "fire") {
+    if (isFireOrg) {
       setDepartmentFilter("fire")
-    } else if (spec === "police" || spec === "security") {
+    } else if (isHospitalOrg) {
+      setDepartmentFilter("medical")
+    } else if (isPoliceOrg) {
       setDepartmentFilter("security")
     }
-  }, [user])
+  }, [user, isFireOrg, isHospitalOrg, isPoliceOrg])
 
   // Computed visible alerts filtered by declined IDs, stale filter, and department specialization
   const visibleAlerts = alerts.filter((a) => {
     // 1. If citizen/victim: ONLY show their OWN alert! Never show other users' emergencies
     if (isVictimUser) {
-      return (user && a.user_id === user.id) || (userPhone && a.metadata?.victim_phone === userPhone)
+      const activeSosId = typeof window !== "undefined" ? localStorage.getItem("bridgex_active_sos_id") : null
+      const isMySosId = activeSosId && a.id === activeSosId
+      const isMyUserId = Boolean(user && a.user_id === user.id)
+      const isMyPhone = Boolean(userPhone && (a.metadata?.victim_phone === userPhone || a.metadata?.phone === userPhone))
+      return Boolean(isMySosId || isMyUserId || isMyPhone)
     }
 
     // 2. Never show if rejected / declined by this responder
@@ -213,9 +234,15 @@ export function ActiveAlerts() {
     if (ageHours > 24 && !a.accepted_by) return false
 
     // 4. Department matching:
-    // If responder has medical specialization, "accident" and "medical" are both medical emergencies
     if (departmentFilter === "medical") {
+      // Hospitals receive medical and accident emergencies
       if (a.emergency_type !== "medical" && a.emergency_type !== "accident") return false
+    } else if (departmentFilter === "fire") {
+      // Fire departments receive fire emergencies
+      if (a.emergency_type !== "fire") return false
+    } else if (departmentFilter === "security" || departmentFilter === "police") {
+      // Police departments receive security and police emergencies
+      if (a.emergency_type !== "security" && a.emergency_type !== "police") return false
     } else if (departmentFilter !== "all") {
       if (a.emergency_type !== departmentFilter) return false
     }
@@ -344,8 +371,10 @@ export function ActiveAlerts() {
 
             // CITIZENS / VICTIMS: ONLY receive updates about their own SOS!
             if (isVictimUser) {
+              const activeSosId = typeof window !== "undefined" ? localStorage.getItem("bridgex_active_sos_id") : null
               const isMine =
                 (user && newAlert.user_id === user.id) ||
+                (activeSosId && newAlert.id === activeSosId) ||
                 (userPhone && newAlert.metadata?.victim_phone === userPhone)
               if (isMine) {
                 setAlerts((prev) => [newAlert, ...prev.filter((a) => a.id !== newAlert.id)])
@@ -435,18 +464,27 @@ export function ActiveAlerts() {
     try {
       if (isVictimUser) {
         // Citizens / Victims: ONLY fetch their OWN active SOS
-        if (!user?.id) {
+        const activeSosId = typeof window !== "undefined" ? localStorage.getItem("bridgex_active_sos_id") : null
+        if (!user?.id && !activeSosId) {
           setAlerts([])
           return
         }
-        const { data, error } = await supabase
+        let query = supabase
           .from("alerts")
           .select("*, profiles:user_id(name, phone)")
-          .eq("user_id", user.id)
           .in("status", ["active", "responding"])
           .order("created_at", { ascending: false })
           .limit(5)
 
+        if (user?.id && activeSosId) {
+          query = query.or(`user_id.eq.${user.id},id.eq.${activeSosId}`)
+        } else if (user?.id) {
+          query = query.eq("user_id", user.id)
+        } else if (activeSosId) {
+          query = query.eq("id", activeSosId)
+        }
+
+        const { data, error } = await query
         setAlerts(data || [])
         return
       }

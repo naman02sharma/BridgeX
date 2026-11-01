@@ -37,9 +37,9 @@ export async function POST(request: Request) {
 
     // Auto-detect emergency type and target organization from text/translation
     const detected = classifyEmergency(rawMessage, translatedMessage)
-    const finalEmergencyType = detected.category !== 'other' 
-      ? detected.category 
-      : (emergencyType && emergencyType !== 'other' ? emergencyType : 'medical')
+    const finalEmergencyType = (emergencyType && emergencyType !== 'other')
+      ? emergencyType
+      : (detected.category !== 'other' ? detected.category : 'medical')
 
     // Save the alert. The id is generated here so we never need to read the row back
     // (reading would be blocked by row-level security for guests).

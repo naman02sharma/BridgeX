@@ -9,14 +9,12 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { DashboardHeader } from "@/components/dashboard/header"
 import { DashboardStats } from "@/components/dashboard/stats"
+import { ActiveAlerts } from "@/components/active-alerts"
+import { MapView } from "@/components/map-view"
 import { RecentActivity } from "@/components/dashboard/recent-activity"
 import { AlertTrendsChart } from "@/components/dashboard/alert-trends-chart"
 import { ResponseTimeAnalytics } from "@/components/dashboard/response-time-analytics"
-import { GeographicAnalytics } from "@/components/dashboard/geographic-analytics"
-import { ActivityMap } from "@/components/dashboard/activity-map"
 import { ResponderStatus } from "@/components/dashboard/responder-status"
-import { RealtimeTestPanel } from "@/components/realtime-test-panel"
-import { DatabaseTestPanel } from "@/components/database-test-panel"
 
 export default function DashboardPage() {
   const { user, loading } = useSupabase()
@@ -58,26 +56,45 @@ export default function DashboardPage() {
       <Navbar />
       <main className="min-h-screen bg-background pt-20">
         <DashboardHeader />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid lg:grid-cols-3 gap-6 mt-6">
-            <div className="lg:col-span-3">
-              <DashboardStats />
-            </div>
 
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          {/* Operations Overview Stats */}
+          <DashboardStats />
 
-          <div className="grid lg:grid-cols-3 gap-6 mt-6">
+          {/* Operational Dispatch Grid: Real Active Alerts + Live Map */}
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Primary Operations Column: Active Emergency Dispatches & Interactive Map */}
             <div className="lg:col-span-2 space-y-6">
-              <AlertTrendsChart />
+              {/* Live Dispatch Feed with Continuous Audio Siren */}
+              <ActiveAlerts />
+
+              {/* Real Leaflet Map with Geolocation & Responder Positions */}
+              <div className="rounded-xl overflow-hidden border-2 bg-card">
+                <div className="p-4 border-b bg-muted/30 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-foreground text-sm">Live Emergency Tactical Map</h3>
+                    <p className="text-xs text-muted-foreground">Real-time GPS incident locations and nearby response units</p>
+                  </div>
+                </div>
+                <div className="p-2">
+                  <MapView />
+                </div>
+              </div>
+
+              {/* Response Time Analytics */}
               <ResponseTimeAnalytics />
-              <RealtimeTestPanel />
-              <DatabaseTestPanel />
             </div>
+
+            {/* Sidebar Operations: Responders, Activity & Trends */}
             <div className="space-y-6">
-              <RecentActivity />
-              <GeographicAnalytics />
-              <ActivityMap />
+              {/* On-Duty Responder Teams */}
               <ResponderStatus />
+
+              {/* Real-time Emergency Activity Log */}
+              <RecentActivity />
+
+              {/* Incident Trends Chart */}
+              <AlertTrendsChart />
             </div>
           </div>
         </div>

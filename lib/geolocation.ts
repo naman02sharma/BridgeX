@@ -1,6 +1,9 @@
 export interface Coordinates {
   lat: number
   lng: number
+  accuracy?: number
+  city?: string
+  source?: "gps" | "ip" | "cache" | "default"
 }
 
 export interface GeolocationError {
@@ -8,36 +11,100 @@ export interface GeolocationError {
   message: string
 }
 
-export const getUserLocation = (): Promise<Coordinates> => {
-  return new Promise((resolve, reject) => {
-    if (!("geolocation" in navigator)) {
-      reject({
-        code: 0,
-        message: "Geolocation is not supported by your browser",
-      })
-      return
-    }
+// Fallback coordinates (Mumbai / Thane region)
+const DEFAULT_COORDS: Coordinates = {
+  lat: 19.0760,
+  lng: 72.8777,
+  source: "default"
+}
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        })
-      },
-      (error) => {
-        reject({
-          code: error.code,
-          message: error.message,
-        })
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0,
-      },
-    )
-  })
+/**
+ * Fetch approximate coordinates from IP geolocation
+ */
+async function getIpLocation(): Promise<Coordinates | null> {
+  try {
+    const res = await fetch("https://freeipapi.com/api/json", {
+      signal: AbortSignal.timeout(3000)
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    if (typeof data.latitude === "number" && typeof data.longitude === "number") {
+      return {
+        lat: data.latitude,
+        lng: data.longitude,
+        city: data.cityName || data.regionName,
+        source: "ip"
+      }
+    }
+  } catch (err) {
+    // Ignore IP fetch errors
+  }
+  return null
+}
+
+/**
+ * High-reliability location getter:
+ * 1. Checks recent localStorage cache
+ * 2. Attempts browser GPS with 5s timeout
+ * 3. Falls back to IP Geolocation if GPS is blocked/unavailable
+ * 4. Falls back to default region if offline
+ */
+export const getUserLocation = async (): Promise<Coordinates> => {
+  if (typeof window === "undefined") return DEFAULT_COORDS
+
+  // 1. Check cached position (valid for 15 mins)
+  try {
+    const cached = localStorage.getItem("bridgex_user_coords")
+    if (cached) {
+      const parsed = JSON.parse(cached)
+      if (parsed.lat && parsed.lng && Date.now() - (parsed.time || 0) < 15 * 60 * 1000) {
+        return { lat: parsed.lat, lng: parsed.lng, source: "cache" }
+      }
+    }
+  } catch {}
+
+  // 2. Try browser GPS
+  if ("geolocation" in navigator) {
+    try {
+      const position = await new Promise<Coordinates>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            resolve({
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude,
+              accuracy: pos.coords.accuracy,
+              source: "gps"
+            })
+          },
+          (err) => reject(err),
+          {
+            enableHighAccuracy: false, // Low accuracy is significantly faster & more reliable on desktop
+            timeout: 4000,
+            maximumAge: 60000,
+          }
+        )
+      })
+
+      try {
+        localStorage.setItem("bridgex_user_coords", JSON.stringify({ ...position, time: Date.now() }))
+      } catch {}
+      return position
+    } catch {
+      // GPS timed out or denied, proceed to IP fallback
+    }
+  }
+
+  // 3. Try IP-based location
+  const ipLoc = await getIpLocation()
+  if (ipLoc) {
+    try {
+      localStorage.setItem("bridgex_user_coords", JSON.stringify({ ...ipLoc, time: Date.now() }))
+    } catch {}
+    return ipLoc
+  }
+
+  // 4. Return default fallback
+  return DEFAULT_COORDS
 }
 
 export const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {

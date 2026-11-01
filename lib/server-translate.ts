@@ -54,9 +54,9 @@ async function lingoTranslate(
   if (!lingo || typeof lingo.localizeText !== "function") return null
 
   try {
-    const options: any = { targetLocale: target }
-    if (source && source !== "auto" && source !== "und" && typeof source === "string") {
-      options.sourceLocale = source
+    const options: any = {
+      targetLocale: target,
+      sourceLocale: (source && source !== "auto" && source !== "und" && typeof source === "string") ? source : null
     }
     const res = await Promise.race([
       lingo.localizeText(text, options),
