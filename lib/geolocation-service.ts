@@ -70,8 +70,7 @@ export async function getUserLocation(
   } catch (err) {
     console.warn("Location error:", err)
   }
-  const isApsit = String(accountIdentifier || "").includes("apsit") || String(accountOrg || "").toLowerCase().includes("apsit")
-  return isApsit ? { lat: 19.2680, lon: 72.9673 } : { lat: 19.2183, lon: 72.9781 }
+  return { lat: 19.2680, lon: 72.9673 } // Default: A. P. Shah Institute of Technology, Thane
 }
 
 /**

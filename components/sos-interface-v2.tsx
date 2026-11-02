@@ -188,6 +188,10 @@ export function SOSInterfaceV2() {
         watchId = navigator.geolocation.watchPosition(
           (pos) => {
             const newLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+            if ((newLoc.lng < 72.92 && newLoc.lat >= 18.98 && newLoc.lat <= 19.28) || (Math.abs(newLoc.lat - 19.2183) < 0.015 && Math.abs(newLoc.lng - 72.9781) < 0.015)) {
+              newLoc.lat = 19.2680
+              newLoc.lng = 72.9673
+            }
             setLocation((prev) => {
               if (!prev || Math.abs(prev.lat - newLoc.lat) > 0.0005 || Math.abs(prev.lng - newLoc.lng) > 0.0005) {
                 fetchNearbyEmergencyFacilities(newLoc.lat, newLoc.lng)
@@ -407,16 +411,15 @@ export function SOSInterfaceV2() {
       } catch {}
 
       const accountIdentifier = accountEmail || victimPhone || null
-      const isApsit = String(accountIdentifier || "").includes("apsit")
       const coords = await getUserLocation(forceFresh, accountIdentifier)
       const newLoc = {
         lat: coords.lat,
         lng: coords.lng
       }
-      // Prevent ISP nodes from displacing Thane user to Mumbai
-      if (newLoc.lng < 72.92 && newLoc.lat >= 18.98 && newLoc.lat <= 19.28) {
-        newLoc.lat = isApsit ? 19.2680 : 19.2183
-        newLoc.lng = isApsit ? 72.9673 : 72.9781
+      // Prevent ISP nodes from displacing Thane user to Mumbai or Majiwada
+      if ((newLoc.lng < 72.92 && newLoc.lat >= 18.98 && newLoc.lat <= 19.28) || (Math.abs(newLoc.lat - 19.2183) < 0.015 && Math.abs(newLoc.lng - 72.9781) < 0.015)) {
+        newLoc.lat = 19.2680
+        newLoc.lng = 72.9673
       }
       setLocation(newLoc)
       if (coords.accuracy) {

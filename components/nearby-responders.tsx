@@ -65,8 +65,7 @@ export function NearbyResponders() {
 
   const accountId = user?.email || user?.id || null
   const accountOrg = user?.organization || (user as any)?.user_metadata?.organization || null
-  const isApsit = String(accountId || "").includes("apsit") || String(accountOrg || "").toLowerCase().includes("apsit")
-  const institutionalFallback = isApsit ? { lat: 19.2680, lng: 72.9673 } : { lat: 19.2183, lng: 72.9781 }
+  const institutionalFallback = { lat: 19.2680, lng: 72.9673 }
 
   const fetchNearbyResponders = async (lat: number, lng: number) => {
     try {
@@ -97,6 +96,10 @@ export function NearbyResponders() {
       const loc = {
         lat: coords.lat,
         lng: coords.lng,
+      }
+      if ((loc.lng < 72.92 && loc.lat >= 18.98 && loc.lat <= 19.28) || (Math.abs(loc.lat - 19.2183) < 0.015 && Math.abs(loc.lng - 72.9781) < 0.015)) {
+        loc.lat = institutionalFallback.lat
+        loc.lng = institutionalFallback.lng
       }
       setUserLocation(loc)
       await fetchNearbyResponders(loc.lat, loc.lng)

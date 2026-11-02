@@ -39,8 +39,7 @@ export function NearbyEmergencyResources({
 
   const accountId = user?.email || user?.id || null
   const accountOrg = user?.organization || (user as any)?.user_metadata?.organization || null
-  const isApsit = String(accountId || "").includes("apsit") || String(accountOrg || "").toLowerCase().includes("apsit")
-  const defaultCenter = isApsit ? { lat: 19.2680, lon: 72.9673 } : { lat: 19.2183, lon: 72.9781 }
+  const defaultCenter = { lat: 19.2680, lon: 72.9673 } // A. P. Shah Institute of Technology, Thane
 
   const fetchResources = async () => {
     try {
@@ -51,13 +50,18 @@ export function NearbyEmergencyResources({
       
       let locLat = result.userLocation?.lat || defaultCenter.lat
       let locLon = result.userLocation?.lon || defaultCenter.lon
-      // If location resolved to Mumbai western ISP node (lon < 72.92), correct to Thane
-      if (locLon < 72.92 && locLat >= 18.98 && locLat <= 19.28) {
+      const isMisplaced = (lat?: number | null, lon?: number | null) => {
+        if (typeof lat !== "number" || typeof lon !== "number") return true
+        return (lon < 72.92 && lat >= 18.98 && lat <= 19.28) ||
+          (Math.abs(lat - 19.2183) < 0.015 && Math.abs(lon - 72.9781) < 0.015)
+      }
+
+      if (isMisplaced(locLat, locLon)) {
         locLat = defaultCenter.lat
         locLon = defaultCenter.lon
       }
 
-      if (result.success && result.places.length > 0 && !(result.userLocation && result.userLocation.lon < 72.92 && result.userLocation.lat >= 18.98)) {
+      if (result.success && result.places.length > 0 && result.userLocation && !isMisplaced(result.userLocation.lat, result.userLocation.lon)) {
         setPlaces(result.places)
         setUserLocation(result.userLocation)
         return
@@ -242,8 +246,18 @@ export function NearbyEmergencyResources({
             ))}
           </div>
         </div>
-        <CardDescription>
-          {t('foundPlaces', 'Found')} {places.length} {t('placesNearby', 'places nearby within')} {radiusMeters / 1000} km
+        <CardDescription className="flex items-center justify-between flex-wrap gap-1">
+          <span>
+            {t('foundPlaces', 'Found')} {places.length} {t('placesNearby', 'places nearby within')} {radiusMeters / 1000} km
+          </span>
+          {userLocation && (
+            <span className="text-xs text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
+              {Math.abs(userLocation.lat - 19.2680) < 0.02 && Math.abs(userLocation.lon - 72.9673) < 0.02
+                ? "A. P. Shah Institute of Technology, Thane"
+                : `${userLocation.lat.toFixed(3)}, ${userLocation.lon.toFixed(3)}`}
+            </span>
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

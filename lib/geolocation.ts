@@ -11,11 +11,11 @@ export interface GeolocationError {
   message: string
 }
 
-// Default regional center: Thane (Mumbai MMR)
+// Default regional center: A. P. Shah Institute of Technology, Thane (Kasarvadavali, Ghodbunder Road)
 export const DEFAULT_COORDS: Coordinates = {
-  lat: 19.2183,
-  lng: 72.9781,
-  city: "Thane",
+  lat: 19.2680,
+  lng: 72.9673,
+  city: "Thane (A. P. Shah Institute of Technology)",
   source: "default"
 }
 
@@ -23,6 +23,10 @@ export const DEFAULT_COORDS: Coordinates = {
 // Whenever an IP lookup points west of lng 72.92 in the Mumbai MMR latitude band, it's an ISP datacenter node, not client location
 export function isMisleadingIspGateway(lat: number, lng: number): boolean {
   if (lng < 72.92 && lat >= 18.98 && lat <= 19.28) {
+    return true
+  }
+  // Reject stale Majiwada / Kapurbawdi node (19.2183, 72.9781) so user is centered at APSIT
+  if (Math.abs(lat - 19.2183) < 0.015 && Math.abs(lng - 72.9781) < 0.015) {
     return true
   }
   return false
@@ -33,8 +37,8 @@ export const isKurlaGateway = isMisleadingIspGateway
 
 /**
  * Account-based location resolver:
- * Ensures accounts located in Thane (including APSIT institutional accounts and Naman Sharma's account)
- * always resolve directly to Thane without being displaced to western Mumbai ISP nodes.
+ * Ensures all accounts at A. P. Shah Institute of Technology in Thane
+ * (including Naman Sharma and APSIT accounts) resolve directly to the APSIT campus.
  */
 export function resolveLocationFromAccount(
   accountIdentifier?: string | null,
@@ -60,26 +64,26 @@ export function resolveLocationFromAccount(
     }
   }
 
-  // 2. Account: Naman Sharma (located in Thane)
+  // 2. Account: Naman Sharma (located at APSIT Thane)
   if (
     idStr.includes("namansharma1359@gmail.com") ||
     idStr.includes("namansharma") ||
     idStr.includes("naman")
   ) {
     return {
-      lat: 19.2183,
-      lng: 72.9781,
-      city: "Thane",
+      lat: 19.2680,
+      lng: 72.9673,
+      city: "Thane (A. P. Shah Institute of Technology)",
       source: "account"
     }
   }
 
-  // 3. General Thane account
+  // 3. General Thane account (defaults to APSIT campus Kasarvadavali)
   if (idStr.includes("thane") || orgStr.includes("thane")) {
     return {
-      lat: 19.2183,
-      lng: 72.9781,
-      city: "Thane",
+      lat: 19.2680,
+      lng: 72.9673,
+      city: "Thane (A. P. Shah Institute of Technology)",
       source: "account"
     }
   }
@@ -100,9 +104,9 @@ export function resolveLocationFromPhone(phone?: string | null): Coordinates | n
     return { lat: 18.9894, lng: 73.1175, city: "Panvel", source: "phone" }
   }
 
-  // Mumbai / Thane / Navi Mumbai STD codes (022 / 22)
+  // Mumbai / Thane / Navi Mumbai STD codes (022 / 22) -> A. P. Shah Institute of Technology, Thane
   if (clean.startsWith("022") || clean.startsWith("9122")) {
-    return { lat: 19.2183, lng: 72.9781, city: "Thane", source: "phone" }
+    return { lat: 19.2680, lng: 72.9673, city: "Thane (A. P. Shah Institute of Technology)", source: "phone" }
   }
 
   return null
@@ -196,8 +200,9 @@ export const getUserLocation = async (
       const cached = localStorage.getItem(cacheKey)
       if (cached) {
         const parsed = JSON.parse(cached)
-        if (
-          !isMisleadingIspGateway(parsed.lat, parsed.lng) &&
+        if (isMisleadingIspGateway(parsed.lat, parsed.lng)) {
+          localStorage.removeItem(cacheKey)
+        } else if (
           parsed.lat &&
           parsed.lng &&
           parsed.source === "gps" &&

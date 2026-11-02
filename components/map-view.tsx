@@ -55,8 +55,7 @@ export function MapView() {
 
     const accountId = user?.email || user?.id || null
     const accountOrg = user?.organization || (user as any)?.user_metadata?.organization || null
-    const isApsit = String(accountId || "").includes("apsit") || String(accountOrg || "").toLowerCase().includes("apsit")
-    const institutionalFallback = isApsit ? { lat: 19.2680, lng: 72.9673 } : { lat: 19.2183, lng: 72.9781 }
+    const institutionalFallback = { lat: 19.2680, lng: 72.9673 }
 
     const initLocation = async () => {
       setLoading(true)
@@ -64,8 +63,8 @@ export function MapView() {
         const coords = await getUserLocation(true, accountId, accountOrg)
         if (mounted && coords) {
           const loc = { lat: coords.lat, lng: coords.lng }
-          // Prevent ISP nodes from displacing Thane user to Mumbai
-          if (loc.lng < 72.92 && loc.lat >= 18.98 && loc.lat <= 19.28) {
+          // Prevent ISP nodes from displacing Thane user to Mumbai or Majiwada
+          if ((loc.lng < 72.92 && loc.lat >= 18.98 && loc.lat <= 19.28) || (Math.abs(loc.lat - 19.2183) < 0.015 && Math.abs(loc.lng - 72.9781) < 0.015)) {
             loc.lat = institutionalFallback.lat
             loc.lng = institutionalFallback.lng
           }
@@ -125,21 +124,20 @@ export function MapView() {
     try {
       const accountId = user?.email || user?.id || null
       const accountOrg = user?.organization || (user as any)?.user_metadata?.organization || null
-      const isApsit = String(accountId || "").includes("apsit") || String(accountOrg || "").toLowerCase().includes("apsit")
-      const institutionalFallback = isApsit ? { lat: 19.2680, lng: 72.9673 } : { lat: 19.2183, lng: 72.9781 }
+      const institutionalFallback = { lat: 19.2680, lng: 72.9673 }
 
       localStorage.removeItem("bridgex_user_coords")
+      if (accountId) localStorage.removeItem(`bridgex_coords_${accountId}`)
       const coords = await getUserLocation(true, accountId, accountOrg)
       const loc = { lat: coords.lat, lng: coords.lng }
-      if (loc.lng < 72.92 && loc.lat >= 18.98 && loc.lat <= 19.28) {
+      if ((loc.lng < 72.92 && loc.lat >= 18.98 && loc.lat <= 19.28) || (Math.abs(loc.lat - 19.2183) < 0.015 && Math.abs(loc.lng - 72.9781) < 0.015)) {
         loc.lat = institutionalFallback.lat
         loc.lng = institutionalFallback.lng
       }
       setUserLocation(loc)
       await loadMapResources(loc)
     } catch {
-      const isApsit = String(user?.email || "").includes("apsit") || String(user?.organization || "").toLowerCase().includes("apsit")
-      const fallback = isApsit ? { lat: 19.2680, lng: 72.9673 } : { lat: 19.2183, lng: 72.9781 }
+      const fallback = { lat: 19.2680, lng: 72.9673 }
       setUserLocation(fallback)
       await loadMapResources(fallback)
     } finally {

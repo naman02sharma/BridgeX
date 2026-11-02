@@ -139,9 +139,14 @@ export default function MapContent({ userLocation, responders }: MapContentProps
       {/* User Location Marker */}
       <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
         <Popup>
-          <div className="p-1 text-center">
+          <div className="p-1 text-center min-w-[150px]">
             <div className="font-bold text-sm text-blue-600">📍 You are here</div>
-            <div className="text-xs text-gray-500 mt-1">
+            <div className="text-xs font-semibold text-gray-800 dark:text-gray-200 mt-1">
+              {Math.abs(userLocation.lat - 19.2680) < 0.02 && Math.abs(userLocation.lng - 72.9673) < 0.02
+                ? "A. P. Shah Institute of Technology, Thane"
+                : `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`}
+            </div>
+            <div className="text-[10px] text-gray-500 mt-0.5">
               {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
             </div>
           </div>
