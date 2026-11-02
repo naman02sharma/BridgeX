@@ -73,6 +73,13 @@ export function LoginForm() {
       }
 
       if (typeof window !== "undefined") {
+        // Clear previous user's cached coordinates and stale session
+        localStorage.removeItem("bridgex_user_coords")
+        localStorage.removeItem("bridgex_selected_city")
+        localStorage.removeItem("bridgex_user_phone")
+        localStorage.removeItem("bridgex_user_name")
+        localStorage.removeItem("bridgex_user_role")
+
         if (userPhone) {
           localStorage.setItem("bridgex_user_phone", userPhone)
         }

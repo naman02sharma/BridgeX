@@ -53,10 +53,15 @@ export function MapView() {
     let mounted = true
     let watchId: number | null = null
 
+    const accountId = user?.email || user?.id || null
+    const accountOrg = user?.organization || (user as any)?.user_metadata?.organization || null
+    const isApsit = String(accountId || "").includes("apsit") || String(accountOrg || "").toLowerCase().includes("apsit")
+    const institutionalFallback = isApsit ? { lat: 19.2680, lng: 72.9673 } : { lat: 19.2183, lng: 72.9781 }
+
     const initLocation = async () => {
       setLoading(true)
       try {
-        const coords = await getUserLocation(true)
+        const coords = await getUserLocation(true, accountId, accountOrg)
         if (mounted && coords) {
           const loc = { lat: coords.lat, lng: coords.lng }
           setUserLocation(loc)
@@ -64,10 +69,9 @@ export function MapView() {
         }
       } catch (err) {
         console.warn("Location init error:", err)
-        const fallback = { lat: 19.2183, lng: 72.9781 } // Thane regional center
         if (mounted) {
-          setUserLocation(fallback)
-          await loadMapResources(fallback)
+          setUserLocation(institutionalFallback)
+          await loadMapResources(institutionalFallback)
         }
       } finally {
         if (mounted) setLoading(false)
@@ -76,7 +80,7 @@ export function MapView() {
 
     initLocation()
 
-    // Real-time live GPS tracking: automatically tracks when user moves (e.g. Panvel to Thane)
+    // Real-time live GPS tracking: automatically tracks when user moves
     if (typeof window !== "undefined" && "geolocation" in navigator) {
       try {
         watchId = navigator.geolocation.watchPosition(
@@ -108,19 +112,25 @@ export function MapView() {
         navigator.geolocation.clearWatch(watchId)
       }
     }
-  }, [user?.phone])
+  }, [user?.id, user?.email])
 
   // Manual refresh GPS location
   const handleRefreshLocation = async () => {
     setLoading(true)
     try {
+      const accountId = user?.email || user?.id || null
+      const accountOrg = user?.organization || (user as any)?.user_metadata?.organization || null
+      const isApsit = String(accountId || "").includes("apsit") || String(accountOrg || "").toLowerCase().includes("apsit")
+      const institutionalFallback = isApsit ? { lat: 19.2680, lng: 72.9673 } : { lat: 19.2183, lng: 72.9781 }
+
       localStorage.removeItem("bridgex_user_coords")
-      const coords = await getUserLocation(true)
+      const coords = await getUserLocation(true, accountId, accountOrg)
       const loc = { lat: coords.lat, lng: coords.lng }
       setUserLocation(loc)
       await loadMapResources(loc)
     } catch {
-      const fallback = { lat: 19.2183, lng: 72.9781 }
+      const isApsit = String(user?.email || "").includes("apsit") || String(user?.organization || "").toLowerCase().includes("apsit")
+      const fallback = isApsit ? { lat: 19.2680, lng: 72.9673 } : { lat: 19.2183, lng: 72.9781 }
       setUserLocation(fallback)
       await loadMapResources(fallback)
     } finally {

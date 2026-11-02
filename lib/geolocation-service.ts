@@ -58,16 +58,20 @@ export function formatDistance(meters: number): string {
 /**
  * Get user's current location with automatic IP and cache fallback
  */
-export async function getUserLocation(): Promise<{ lat: number; lon: number } | null> {
+export async function getUserLocation(
+  accountIdentifier?: string | null,
+  accountOrg?: string | null
+): Promise<{ lat: number; lon: number } | null> {
   try {
-    const coords = await getBaseLocation(true)
+    const coords = await getBaseLocation(true, accountIdentifier, accountOrg)
     if (coords && typeof coords.lat === "number" && typeof coords.lng === "number") {
       return { lat: coords.lat, lon: coords.lng }
     }
   } catch (err) {
     console.warn("Location error:", err)
   }
-  return { lat: 19.2183, lon: 72.9781 } // Default to Thane regional center
+  const isApsit = String(accountIdentifier || "").includes("apsit") || String(accountOrg || "").toLowerCase().includes("apsit")
+  return isApsit ? { lat: 19.2680, lon: 72.9673 } : { lat: 19.2183, lon: 72.9781 }
 }
 
 /**
@@ -115,9 +119,11 @@ export async function fetchNearbyNGOs(
  * Main function to get all nearby emergency resources within 15-20 km range
  */
 export async function getNearbyEmergencyResources(
-  radiusMeters: number = 20000
+  radiusMeters: number = 20000,
+  accountIdentifier?: string | null,
+  accountOrg?: string | null
 ): Promise<GeolocationResult> {
-  const userLocation = await getUserLocation()
+  const userLocation = await getUserLocation(accountIdentifier, accountOrg)
 
   if (!userLocation) {
     return {

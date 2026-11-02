@@ -64,6 +64,28 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session)
+        const currentUserId = session?.user?.id || null
+        if (typeof window !== "undefined") {
+          const previousUserId = localStorage.getItem("bridgex_user_id")
+          if (previousUserId && previousUserId !== currentUserId) {
+            // User switched accounts! Purge all previous account cached state
+            try {
+              localStorage.removeItem("bridgex_user_coords")
+              localStorage.removeItem(`bridgex_coords_${previousUserId}`)
+              localStorage.removeItem("bridgex_user_phone")
+              localStorage.removeItem("bridgex_user_name")
+              localStorage.removeItem("bridgex_user_role")
+              localStorage.removeItem("bridgex_active_sos_id")
+              localStorage.removeItem("bridgex_selected_city")
+            } catch {}
+          }
+          if (currentUserId) {
+            localStorage.setItem("bridgex_user_id", currentUserId)
+          } else {
+            localStorage.removeItem("bridgex_user_id")
+            localStorage.removeItem("bridgex_user_coords")
+          }
+        }
         await loadFullUser(session?.user)
       }
     )

@@ -400,7 +400,15 @@ export function SOSInterfaceV2() {
   const getLocation = async (forceFresh = false) => {
     setLocationLoading(true)
     try {
-      const coords = await getUserLocation(forceFresh, victimPhone)
+      let accountEmail: string | null = null
+      try {
+        const { data: { user: currentUser } } = await supabase.auth.getUser()
+        if (currentUser?.email) accountEmail = currentUser.email
+      } catch {}
+
+      const accountIdentifier = accountEmail || victimPhone || null
+      const isApsit = String(accountIdentifier || "").includes("apsit")
+      const coords = await getUserLocation(forceFresh, accountIdentifier)
       const newLoc = {
         lat: coords.lat,
         lng: coords.lng
@@ -423,7 +431,7 @@ export function SOSInterfaceV2() {
         .catch(() => {})
     } catch (error) {
       console.warn("Could not get location:", error)
-      const fallbackLoc = { lat: 19.2183, lng: 72.9781 }
+      const fallbackLoc = { lat: 19.2680, lng: 72.9673 } // Thane Kasarvadavali (APSIT)
       setLocation(fallbackLoc)
       fetchNearbyEmergencyFacilities(fallbackLoc.lat, fallbackLoc.lng)
     } finally {

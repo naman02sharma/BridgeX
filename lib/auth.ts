@@ -173,6 +173,21 @@ export const signIn = async (email: string, password: string) => {
 }
 
 export const signOut = async () => {
+  if (typeof window !== "undefined") {
+    try {
+      const userId = localStorage.getItem("bridgex_user_id")
+      if (userId) localStorage.removeItem(`bridgex_coords_${userId}`)
+      localStorage.removeItem("bridgex_user_coords")
+      localStorage.removeItem("bridgex_user_id")
+      localStorage.removeItem("bridgex_user_phone")
+      localStorage.removeItem("bridgex_user_name")
+      localStorage.removeItem("bridgex_user_role")
+      localStorage.removeItem("bridgex_active_sos_id")
+      localStorage.removeItem("bridgex_selected_city")
+      localStorage.removeItem("bridgex_accepted_alert_ids")
+      localStorage.removeItem("bridgex_declined_alert_ids")
+    } catch {}
+  }
   const { error } = await supabase.auth.signOut()
   if (error) throw error
 }

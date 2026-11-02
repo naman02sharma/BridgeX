@@ -12,6 +12,7 @@ import {
   type NearbyPlace 
 } from "@/lib/geolocation-service"
 import { useGlobalTranslation } from "./translation-provider"
+import { useSupabase } from "@/components/supabase-provider"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface NearbyEmergencyResourcesProps {
@@ -28,6 +29,7 @@ export function NearbyEmergencyResources({
   refreshInterval = 60000, // 1 minute
 }: NearbyEmergencyResourcesProps) {
   const { t } = useGlobalTranslation()
+  const { user } = useSupabase()
   const [radiusMeters, setRadiusMeters] = useState<number>(initialRadius)
   const [places, setPlaces] = useState<NearbyPlace[]>([])
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null)
@@ -35,12 +37,17 @@ export function NearbyEmergencyResources({
   const [error, setError] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
+  const accountId = user?.email || user?.id || null
+  const accountOrg = user?.organization || (user as any)?.user_metadata?.organization || null
+  const isApsit = String(accountId || "").includes("apsit") || String(accountOrg || "").toLowerCase().includes("apsit")
+  const defaultCenter = isApsit ? { lat: 19.2680, lon: 72.9673 } : { lat: 19.2183, lon: 72.9781 }
+
   const fetchResources = async () => {
     try {
       setLoading(true)
       setError(null)
       
-      const result = await getNearbyEmergencyResources(radiusMeters)
+      const result = await getNearbyEmergencyResources(radiusMeters, accountId, accountOrg)
       
       if (result.success && result.places.length > 0) {
         setPlaces(result.places)
@@ -48,9 +55,9 @@ export function NearbyEmergencyResources({
         return
       }
 
-      // Secondary fallback to /api/places with resolved regional location (Thane)
-      const fallbackLat = result.userLocation?.lat || 19.2183
-      const fallbackLon = result.userLocation?.lon || 72.9781
+      // Secondary fallback to /api/places with resolved regional location (Thane / APSIT)
+      const fallbackLat = result.userLocation?.lat || defaultCenter.lat
+      const fallbackLon = result.userLocation?.lon || defaultCenter.lon
       try {
         const res = await fetch(`/api/places?lat=${fallbackLat}&lng=${fallbackLon}&radius=${radiusMeters}`)
         if (res.ok) {
@@ -107,7 +114,7 @@ export function NearbyEmergencyResources({
       const interval = setInterval(fetchResources, refreshInterval)
       return () => clearInterval(interval)
     }
-  }, [radiusMeters, autoRefresh, refreshInterval])
+  }, [radiusMeters, autoRefresh, refreshInterval, user?.id, user?.email])
 
   const filteredPlaces = selectedCategory === 'all' 
     ? places 

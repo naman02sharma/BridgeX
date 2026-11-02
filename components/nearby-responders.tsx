@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Hospital, Building2, Users, Phone, MapPin, Clock, Loader2, Navigation, AlertCircle } from "lucide-react"
 import { getUserLocation } from "@/lib/geolocation"
+import { useSupabase } from "@/components/supabase-provider"
 
 interface Responder {
   id: string
@@ -56,10 +57,16 @@ const getTypeColor = (type: string) => {
 }
 
 export function NearbyResponders() {
+  const { user } = useSupabase()
   const [responders, setResponders] = useState<Responder[]>([])
   const [loading, setLoading] = useState(true)
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const accountId = user?.email || user?.id || null
+  const accountOrg = user?.organization || (user as any)?.user_metadata?.organization || null
+  const isApsit = String(accountId || "").includes("apsit") || String(accountOrg || "").toLowerCase().includes("apsit")
+  const institutionalFallback = isApsit ? { lat: 19.2680, lng: 72.9673 } : { lat: 19.2183, lng: 72.9781 }
 
   const fetchNearbyResponders = async (lat: number, lng: number) => {
     try {
@@ -86,7 +93,7 @@ export function NearbyResponders() {
     setLoading(true)
     setError(null)
     try {
-      const coords = await getUserLocation(true)
+      const coords = await getUserLocation(true, accountId, accountOrg)
       const loc = {
         lat: coords.lat,
         lng: coords.lng,
@@ -95,9 +102,8 @@ export function NearbyResponders() {
       await fetchNearbyResponders(loc.lat, loc.lng)
     } catch (err: any) {
       console.warn("Location error:", err)
-      const fallback = { lat: 19.2183, lng: 72.9781 }
-      setUserLocation(fallback)
-      await fetchNearbyResponders(fallback.lat, fallback.lng)
+      setUserLocation(institutionalFallback)
+      await fetchNearbyResponders(institutionalFallback.lat, institutionalFallback.lng)
     } finally {
       setLoading(false)
     }
@@ -127,7 +133,7 @@ export function NearbyResponders() {
         navigator.geolocation.clearWatch(watchId)
       }
     }
-  }, [])
+  }, [user?.id, user?.email])
 
   if (loading) {
     return (
