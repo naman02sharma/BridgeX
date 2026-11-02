@@ -6,6 +6,9 @@ import { translateToEnglish } from "@/lib/server-translate"
 import { dispatchAlert } from "@/lib/dispatch"
 import { classifyEmergency } from "@/lib/emergency-classifier"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 export async function POST(request: Request) {
   try {
     const { userId, emergencyType, urgencyLevel, message, originalMessage, location, metadata, sourceLanguage, phone } = await request.json()

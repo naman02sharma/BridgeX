@@ -52,12 +52,44 @@ export function DashboardStats() {
       )
       .subscribe()
 
-    // Refresh stats every 30 seconds
-    const interval = setInterval(fetchStats, 30000)
+    // Refresh stats every 5 seconds
+    const interval = setInterval(fetchStats, 5000)
+
+    const onStorageChange = (e: StorageEvent) => {
+      if (e.key === "bridgex_new_sos_broadcast" || e.key === "bridgex_last_resolved_alert_id") {
+        fetchStats()
+      }
+    }
+    const onFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") fetchStats()
+    }
+    let bc: BroadcastChannel | null = null
+    try {
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        bc = new BroadcastChannel("bridgex_alerts_bus")
+        bc.onmessage = () => fetchStats()
+      }
+    } catch {}
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("storage", onStorageChange)
+      window.addEventListener("focus", onFocus)
+      document.addEventListener("visibilitychange", onFocus)
+      window.addEventListener("bridgex_new_sos_alert", fetchStats)
+      window.addEventListener("bridgex_emergency_resolved", fetchStats)
+    }
 
     return () => {
       supabase.removeChannel(channel)
       clearInterval(interval)
+      if (bc) try { bc.close() } catch {}
+      if (typeof window !== "undefined") {
+        window.removeEventListener("storage", onStorageChange)
+        window.removeEventListener("focus", onFocus)
+        document.removeEventListener("visibilitychange", onFocus)
+        window.removeEventListener("bridgex_new_sos_alert", fetchStats)
+        window.removeEventListener("bridgex_emergency_resolved", fetchStats)
+      }
     }
   }, [])
 

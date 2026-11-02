@@ -79,6 +79,44 @@ export function AlertsTable() {
 
   useEffect(() => {
     fetchAlerts()
+
+    const poll = setInterval(fetchAlerts, 2500)
+
+    const onStorageChange = (e: StorageEvent) => {
+      if (e.key === "bridgex_new_sos_broadcast" || e.key === "bridgex_last_resolved_alert_id") {
+        fetchAlerts()
+      }
+    }
+    const onFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") fetchAlerts()
+    }
+    let bc: BroadcastChannel | null = null
+    try {
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        bc = new BroadcastChannel("bridgex_alerts_bus")
+        bc.onmessage = () => fetchAlerts()
+      }
+    } catch {}
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("storage", onStorageChange)
+      window.addEventListener("focus", onFocus)
+      document.addEventListener("visibilitychange", onFocus)
+      window.addEventListener("bridgex_new_sos_alert", fetchAlerts)
+      window.addEventListener("bridgex_emergency_resolved", fetchAlerts)
+    }
+
+    return () => {
+      clearInterval(poll)
+      if (bc) try { bc.close() } catch {}
+      if (typeof window !== "undefined") {
+        window.removeEventListener("storage", onStorageChange)
+        window.removeEventListener("focus", onFocus)
+        document.removeEventListener("visibilitychange", onFocus)
+        window.removeEventListener("bridgex_new_sos_alert", fetchAlerts)
+        window.removeEventListener("bridgex_emergency_resolved", fetchAlerts)
+      }
+    }
   }, [])
 
   const getPriorityColor = (priority: string) => {

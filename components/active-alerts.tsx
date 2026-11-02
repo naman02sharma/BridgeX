@@ -368,8 +368,15 @@ export function ActiveAlerts() {
   useEffect(() => {
     fetchAlerts()
 
+    // 1. Fast background polling: ensures alerts and messages show on responder without refreshing
+    const pollInterval = setInterval(() => {
+      fetchAlerts()
+    }, 2500)
+
+    // 2. Real-time Supabase postgres_changes listener
+    const channelName = `active_alerts_feed_${user?.id || "anon"}_${Math.random().toString(36).substring(2, 7)}`
     const channel = supabase
-      .channel("active_alerts_channel")
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
@@ -378,6 +385,8 @@ export function ActiveAlerts() {
           table: "alerts",
         },
         (payload) => {
+          fetchAlerts()
+
           let currentDeclined = Array.from(declinedAlertIdsRef.current)
           let currentAccepted = myAcceptedAlertIds
           try {
@@ -505,10 +514,64 @@ export function ActiveAlerts() {
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          fetchAlerts()
+        }
+      })
+
+    // 3. Instant local & cross-tab synchronization listeners (0ms latency for same-browser testing)
+    const onStorageChange = (e: StorageEvent) => {
+      if (
+        e.key === "bridgex_new_sos_broadcast" ||
+        e.key === "bridgex_active_sos_id" ||
+        e.key === "bridgex_last_resolved_alert_id"
+      ) {
+        fetchAlerts()
+      }
+    }
+
+    const onCustomSosEvent = () => {
+      fetchAlerts()
+    }
+
+    const onVisibilityOrFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        fetchAlerts()
+      }
+    }
+
+    let bc: BroadcastChannel | null = null
+    try {
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        bc = new BroadcastChannel("bridgex_alerts_bus")
+        bc.onmessage = () => {
+          fetchAlerts()
+        }
+      }
+    } catch {}
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("storage", onStorageChange)
+      window.addEventListener("bridgex_new_sos_alert", onCustomSosEvent)
+      window.addEventListener("bridgex_emergency_resolved", onCustomSosEvent)
+      window.addEventListener("focus", onVisibilityOrFocus)
+      document.addEventListener("visibilitychange", onVisibilityOrFocus)
+    }
 
     return () => {
+      clearInterval(pollInterval)
       supabase.removeChannel(channel)
+      if (bc) {
+        try { bc.close() } catch {}
+      }
+      if (typeof window !== "undefined") {
+        window.removeEventListener("storage", onStorageChange)
+        window.removeEventListener("bridgex_new_sos_alert", onCustomSosEvent)
+        window.removeEventListener("bridgex_emergency_resolved", onCustomSosEvent)
+        window.removeEventListener("focus", onVisibilityOrFocus)
+        document.removeEventListener("visibilitychange", onVisibilityOrFocus)
+      }
     }
   }, [user?.id, isVictimUser, userPhone, isHospitalOrg, isFireOrg, isPoliceOrg])
 
@@ -541,25 +604,29 @@ export function ActiveAlerts() {
         return
       }
 
-      // Responders: fetch active/responding dispatches
-      const { data, error } = await supabase
-        .from("alerts")
-        .select("*, profiles:user_id(name, phone)")
-        .in("status", ["active", "responding"])
-        .order("created_at", { ascending: false })
-        .limit(30)
-
-      let list: Alert[] = data || []
-      if (!list || list.length === 0 || error) {
-        try {
-          const apiRes = await fetch("/api/alerts?status=active")
-          if (apiRes.ok) {
-            const apiAlerts = await apiRes.json()
-            if (Array.isArray(apiAlerts)) {
-              list = apiAlerts
-            }
+      // Responders: fetch active/responding dispatches with cache: no-store
+      let list: Alert[] = []
+      try {
+        const apiRes = await fetch("/api/alerts?status=active", { cache: "no-store" })
+        if (apiRes.ok) {
+          const apiAlerts = await apiRes.json()
+          if (Array.isArray(apiAlerts) && apiAlerts.length > 0) {
+            list = apiAlerts
           }
-        } catch {}
+        }
+      } catch {}
+
+      if (list.length === 0) {
+        const { data, error } = await supabase
+          .from("alerts")
+          .select("*, profiles:user_id(name, phone)")
+          .in("status", ["active", "responding"])
+          .order("created_at", { ascending: false })
+          .limit(30)
+
+        if (data && !error && data.length > 0) {
+          list = data
+        }
       }
 
       let currentDeclined = declinedAlertIds

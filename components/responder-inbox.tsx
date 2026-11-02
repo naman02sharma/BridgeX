@@ -210,12 +210,46 @@ export function ResponderInbox() {
     const channel = supabase
       .channel(`responder-inbox-${userId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "alerts" }, () => load())
       .subscribe()
-    // Polling fallback in case realtime isn't enabled for the table
-    const poll = setInterval(load, 6000)
+
+    // Polling fallback every 2 seconds so alerts show without needing refresh
+    const poll = setInterval(load, 2000)
+
+    // Cross-tab and window event listeners
+    const onStorageChange = (e: StorageEvent) => {
+      if (e.key === "bridgex_new_sos_broadcast" || e.key === "bridgex_last_resolved_alert_id") {
+        load()
+      }
+    }
+    const onFocus = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") load()
+    }
+    let bc: BroadcastChannel | null = null
+    try {
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        bc = new BroadcastChannel("bridgex_alerts_bus")
+        bc.onmessage = () => load()
+      }
+    } catch {}
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("storage", onStorageChange)
+      window.addEventListener("focus", onFocus)
+      document.addEventListener("visibilitychange", onFocus)
+      window.addEventListener("bridgex_new_sos_alert", load)
+    }
+
     return () => {
       clearInterval(poll)
       supabase.removeChannel(channel)
+      if (bc) try { bc.close() } catch {}
+      if (typeof window !== "undefined") {
+        window.removeEventListener("storage", onStorageChange)
+        window.removeEventListener("focus", onFocus)
+        document.removeEventListener("visibilitychange", onFocus)
+        window.removeEventListener("bridgex_new_sos_alert", load)
+      }
     }
   }, [userId, load])
 

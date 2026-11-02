@@ -598,6 +598,21 @@ export function SOSInterfaceV2() {
       setAlertId(newAlertId)
       if (typeof window !== "undefined" && newAlertId) {
         localStorage.setItem("bridgex_active_sos_id", newAlertId)
+        // Instantly notify any open responder tabs/windows in real-time
+        try {
+          localStorage.setItem("bridgex_new_sos_broadcast", JSON.stringify({
+            alertId: newAlertId,
+            emergencyType: finalEmergencyType,
+            alert: result.alert,
+            timestamp: Date.now()
+          }))
+          window.dispatchEvent(new CustomEvent("bridgex_new_sos_alert", { detail: { alertId: newAlertId, alert: result.alert } }))
+          if ("BroadcastChannel" in window) {
+            const bc = new BroadcastChannel("bridgex_alerts_bus")
+            bc.postMessage({ type: "NEW_SOS", alertId: newAlertId, alert: result.alert })
+            bc.close()
+          }
+        } catch {}
       }
       setGuestId(isGuest ? userId : null)
       setNotifiedCount(typeof result.dispatch?.notified === "number" ? result.dispatch.notified : null)
