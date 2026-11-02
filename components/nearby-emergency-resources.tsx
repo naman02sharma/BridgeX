@@ -49,22 +49,28 @@ export function NearbyEmergencyResources({
       
       const result = await getNearbyEmergencyResources(radiusMeters, accountId, accountOrg)
       
-      if (result.success && result.places.length > 0) {
+      let locLat = result.userLocation?.lat || defaultCenter.lat
+      let locLon = result.userLocation?.lon || defaultCenter.lon
+      // If location resolved to Mumbai western ISP node (lon < 72.92), correct to Thane
+      if (locLon < 72.92 && locLat >= 18.98 && locLat <= 19.28) {
+        locLat = defaultCenter.lat
+        locLon = defaultCenter.lon
+      }
+
+      if (result.success && result.places.length > 0 && !(result.userLocation && result.userLocation.lon < 72.92 && result.userLocation.lat >= 18.98)) {
         setPlaces(result.places)
         setUserLocation(result.userLocation)
         return
       }
 
       // Secondary fallback to /api/places with resolved regional location (Thane / APSIT)
-      const fallbackLat = result.userLocation?.lat || defaultCenter.lat
-      const fallbackLon = result.userLocation?.lon || defaultCenter.lon
       try {
-        const res = await fetch(`/api/places?lat=${fallbackLat}&lng=${fallbackLon}&radius=${radiusMeters}`)
+        const res = await fetch(`/api/places?lat=${locLat}&lng=${locLon}&radius=${radiusMeters}`)
         if (res.ok) {
           const data = await res.json()
           if (Array.isArray(data.places) && data.places.length > 0) {
             setPlaces(data.places)
-            setUserLocation({ lat: fallbackLat, lon: fallbackLon })
+            setUserLocation({ lat: locLat, lon: locLon })
             return
           }
         }
@@ -72,7 +78,7 @@ export function NearbyEmergencyResources({
 
       // Tertiary fallback to /api/nearby
       try {
-        const res = await fetch(`/api/nearby?lat=${fallbackLat}&lng=${fallbackLon}&radius=20`)
+        const res = await fetch(`/api/nearby?lat=${locLat}&lng=${locLon}&radius=20`)
         if (res.ok) {
           const data = await res.json()
           if (Array.isArray(data.responders) && data.responders.length > 0) {
@@ -88,7 +94,7 @@ export function NearbyEmergencyResources({
               emergency: true
             }))
             setPlaces(mapped)
-            setUserLocation({ lat: fallbackLat, lon: fallbackLon })
+            setUserLocation({ lat: locLat, lon: locLon })
             return
           }
         }

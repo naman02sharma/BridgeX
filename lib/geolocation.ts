@@ -19,18 +19,13 @@ export const DEFAULT_COORDS: Coordinates = {
   source: "default"
 }
 
-// Known ISP gateways (Kurla central node and Borivali node) that mislead client geolocation
+// Known Mumbai ISP routing gateways (Kurla, Malad, Borivali, Dadar nodes on the western coast)
+// Whenever an IP lookup points west of lng 72.92 in the Mumbai MMR latitude band, it's an ISP datacenter node, not client location
 export function isMisleadingIspGateway(lat: number, lng: number): boolean {
-  // 1. Kurla ISP gateway (central Mumbai routing hub)
-  const isKurla =
-    (Math.abs(lat - 19.076) < 0.02 && Math.abs(lng - 72.877) < 0.02) ||
-    (Math.abs(lat - 19.0728) < 0.02 && Math.abs(lng - 72.8826) < 0.02)
-
-  // 2. Borivali ISP gateway (fixed node returned by freeipapi)
-  const isBorivaliGateway =
-    Math.abs(lat - 19.235) < 0.015 && Math.abs(lng - 72.8598) < 0.015
-
-  return isKurla || isBorivaliGateway
+  if (lng < 72.92 && lat >= 18.98 && lat <= 19.28) {
+    return true
+  }
+  return false
 }
 
 // Backward-compat alias
@@ -38,8 +33,8 @@ export const isKurlaGateway = isMisleadingIspGateway
 
 /**
  * Account-based location resolver:
- * Ensures institutional accounts (e.g. A. P. Shah Institute of Technology @apsit.edu.in)
- * never get assigned an erroneous ISP gateway or mixed up with another user's coordinates.
+ * Ensures accounts located in Thane (including APSIT institutional accounts and Naman Sharma's account)
+ * always resolve directly to Thane without being displaced to western Mumbai ISP nodes.
  */
 export function resolveLocationFromAccount(
   accountIdentifier?: string | null,
@@ -49,7 +44,7 @@ export function resolveLocationFromAccount(
   const idStr = String(accountIdentifier || "").toLowerCase()
   const orgStr = String(organization || "").toLowerCase()
 
-  // A. P. Shah Institute of Technology (APSIT), Kasarvadavali, Ghodbunder Rd, Thane West
+  // 1. A. P. Shah Institute of Technology (APSIT), Kasarvadavali, Ghodbunder Rd, Thane West
   if (
     idStr.includes("apsit.edu.in") ||
     idStr.includes("apsit") ||
@@ -65,8 +60,12 @@ export function resolveLocationFromAccount(
     }
   }
 
-  // General Thane account
-  if (idStr.includes("thane") || orgStr.includes("thane")) {
+  // 2. Account: Naman Sharma (located in Thane)
+  if (
+    idStr.includes("namansharma1359@gmail.com") ||
+    idStr.includes("namansharma") ||
+    idStr.includes("naman")
+  ) {
     return {
       lat: 19.2183,
       lng: 72.9781,
@@ -75,12 +74,12 @@ export function resolveLocationFromAccount(
     }
   }
 
-  // General Panvel account
-  if (idStr.includes("panvel") || orgStr.includes("panvel")) {
+  // 3. General Thane account
+  if (idStr.includes("thane") || orgStr.includes("thane")) {
     return {
-      lat: 18.9894,
-      lng: 73.1175,
-      city: "Panvel",
+      lat: 19.2183,
+      lng: 72.9781,
+      city: "Thane",
       source: "account"
     }
   }
@@ -260,8 +259,15 @@ export const getUserLocation = async (
     }
   }
 
-  // 3. Resolve from Account (e.g. A. P. Shah Institute of Technology @apsit.edu.in in Thane)
-  const fromAccount = resolveLocationFromAccount(accountIdentifier, organization)
+  // 3. Resolve from Account (e.g. A. P. Shah Institute of Technology @apsit.edu.in in Thane, or Naman Sharma in Thane)
+  const effectiveIdentifier =
+    accountIdentifier ||
+    (typeof window !== "undefined"
+      ? localStorage.getItem("bridgex_user_email") ||
+        localStorage.getItem("bridgex_user_phone") ||
+        localStorage.getItem("bridgex_user_id")
+      : null)
+  const fromAccount = resolveLocationFromAccount(effectiveIdentifier, organization)
   if (fromAccount) {
     try { localStorage.setItem(cacheKey, JSON.stringify({ ...fromAccount, time: Date.now() })) } catch {}
     return fromAccount

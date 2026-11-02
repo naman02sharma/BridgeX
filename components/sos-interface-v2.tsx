@@ -413,6 +413,11 @@ export function SOSInterfaceV2() {
         lat: coords.lat,
         lng: coords.lng
       }
+      // Prevent ISP nodes from displacing Thane user to Mumbai
+      if (newLoc.lng < 72.92 && newLoc.lat >= 18.98 && newLoc.lat <= 19.28) {
+        newLoc.lat = isApsit ? 19.2680 : 19.2183
+        newLoc.lng = isApsit ? 72.9673 : 72.9781
+      }
       setLocation(newLoc)
       if (coords.accuracy) {
         setLocationAccuracy(Math.round(coords.accuracy))

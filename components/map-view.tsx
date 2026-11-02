@@ -64,6 +64,11 @@ export function MapView() {
         const coords = await getUserLocation(true, accountId, accountOrg)
         if (mounted && coords) {
           const loc = { lat: coords.lat, lng: coords.lng }
+          // Prevent ISP nodes from displacing Thane user to Mumbai
+          if (loc.lng < 72.92 && loc.lat >= 18.98 && loc.lat <= 19.28) {
+            loc.lat = institutionalFallback.lat
+            loc.lng = institutionalFallback.lng
+          }
           setUserLocation(loc)
           await loadMapResources(loc)
         }
@@ -126,6 +131,10 @@ export function MapView() {
       localStorage.removeItem("bridgex_user_coords")
       const coords = await getUserLocation(true, accountId, accountOrg)
       const loc = { lat: coords.lat, lng: coords.lng }
+      if (loc.lng < 72.92 && loc.lat >= 18.98 && loc.lat <= 19.28) {
+        loc.lat = institutionalFallback.lat
+        loc.lng = institutionalFallback.lng
+      }
       setUserLocation(loc)
       await loadMapResources(loc)
     } catch {

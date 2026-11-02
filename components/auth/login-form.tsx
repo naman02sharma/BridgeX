@@ -80,6 +80,10 @@ export function LoginForm() {
         localStorage.removeItem("bridgex_user_name")
         localStorage.removeItem("bridgex_user_role")
 
+        localStorage.removeItem("bridgex_user_email")
+        if (user.email) {
+          localStorage.setItem("bridgex_user_email", user.email)
+        }
         if (userPhone) {
           localStorage.setItem("bridgex_user_phone", userPhone)
         }

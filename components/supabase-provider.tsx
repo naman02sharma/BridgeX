@@ -36,6 +36,9 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
       // First set immediate metadata-based user
       const immediateUser = convertSupabaseUser(rawUser)
       setUser(immediateUser)
+      if (typeof window !== "undefined" && rawUser?.email) {
+        try { localStorage.setItem("bridgex_user_email", rawUser.email) } catch {}
+      }
 
       // Asynchronously enrich with database profile and responder info
       try {
