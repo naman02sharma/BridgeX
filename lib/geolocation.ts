@@ -111,12 +111,11 @@ async function getIpLocation(): Promise<Coordinates | null> {
 
 /**
  * High-reliability location getter:
- * 1. Checks user account / profile / selected city (e.g. Panvel)
- * 2. Checks recent valid GPS cache (< 2 minutes old)
- * 3. Attempts hardware/browser GPS with 2-tier fallback (High Accuracy -> Wi-Fi network location)
- * 4. Resolves according to phone number location for all accounts
- * 5. Falls back to IP Geolocation (rejecting Kurla ISP gateway)
- * 6. Defaults to Panvel
+ * 1. Checks recent valid GPS cache (< 30 seconds old, GPS source only)
+ * 2. Attempts hardware/browser GPS with 2-tier fallback (High Accuracy -> Wi-Fi network location)
+ * 3. Falls back to IP Geolocation (rejecting Kurla ISP gateway)
+ * 4. Defaults to Panvel
+ * NOTE: Phone-number based location removed — phone prefix is NOT real-time location
  */
 export const getUserLocation = async (
   forceFresh = false,
@@ -124,7 +123,7 @@ export const getUserLocation = async (
 ): Promise<Coordinates> => {
   if (typeof window === "undefined") return DEFAULT_COORDS
 
-  // 1. Check cached position if recent and not the Kurla ISP gateway (< 2 minutes)
+  // 1. Check GPS cache — only accept GPS-sourced coords less than 30 seconds old
   if (!forceFresh) {
     try {
       const cached = localStorage.getItem("bridgex_user_coords")
@@ -136,7 +135,7 @@ export const getUserLocation = async (
           parsed.lat &&
           parsed.lng &&
           parsed.source === "gps" &&
-          Date.now() - (parsed.time || 0) < 2 * 60 * 1000
+          Date.now() - (parsed.time || 0) < 30 * 1000 // 30-second cache only
         ) {
           return { lat: parsed.lat, lng: parsed.lng, accuracy: parsed.accuracy, city: parsed.city, source: "cache" }
         }
@@ -144,7 +143,10 @@ export const getUserLocation = async (
     } catch {}
   }
 
-  // 3. Try browser GPS with 2-tier fallback: High Accuracy -> Wi-Fi network triangulation
+  // Always clear stale/phone-based cache before attempting GPS so previous results don't linger
+  try { localStorage.removeItem("bridgex_user_coords") } catch {}
+
+  // 2. Try browser GPS with 2-tier fallback: High Accuracy -> Wi-Fi network triangulation
   if ("geolocation" in navigator) {
     try {
       const pos = await new Promise<Coordinates>((resolve, reject) => {
@@ -158,7 +160,7 @@ export const getUserLocation = async (
           (err) => reject(err),
           {
             enableHighAccuracy: true,
-            timeout: 5000,
+            timeout: 10000,  // increased to 10s for better accuracy
             maximumAge: 0,
           }
         )
@@ -182,8 +184,8 @@ export const getUserLocation = async (
             (err) => reject(err),
             {
               enableHighAccuracy: false,
-              timeout: 4000,
-              maximumAge: 30000,
+              timeout: 6000,
+              maximumAge: 0,  // never use stale GPS fix
             }
           )
         })
@@ -196,19 +198,7 @@ export const getUserLocation = async (
     }
   }
 
-  // 4. Resolve from Phone Number / Account Location for all accounts
-  const effectivePhone =
-    userPhone ||
-    (typeof window !== "undefined" ? localStorage.getItem("bridgex_user_phone") : null)
-  if (effectivePhone) {
-    const fromPhone = resolveLocationFromPhone(effectivePhone)
-    if (fromPhone) {
-      try { localStorage.setItem("bridgex_user_coords", JSON.stringify({ ...fromPhone, time: Date.now() })) } catch {}
-      return fromPhone
-    }
-  }
-
-  // 5. Try IP-based location (Rejecting Kurla ISP routing gateway)
+  // 3. Try IP-based location (Rejecting Kurla ISP routing gateway)
   const ipLoc = await getIpLocation()
   if (ipLoc) {
     const isKurla =
@@ -220,8 +210,7 @@ export const getUserLocation = async (
     }
   }
 
-  // 6. Default to Panvel
-  try { localStorage.setItem("bridgex_user_coords", JSON.stringify({ ...DEFAULT_COORDS, time: Date.now() })) } catch {}
+  // 4. Default to Panvel
   return DEFAULT_COORDS
 }
 
