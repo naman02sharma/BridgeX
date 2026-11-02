@@ -86,7 +86,6 @@ export function NearbyResponders() {
     setLoading(true)
     setError(null)
     try {
-      // getUserLocation always returns coords (falls back to IP then Panvel default) — never throws
       const coords = await getUserLocation(true)
       const loc = {
         lat: coords.lat,
@@ -96,8 +95,7 @@ export function NearbyResponders() {
       await fetchNearbyResponders(loc.lat, loc.lng)
     } catch (err: any) {
       console.warn("Location error:", err)
-      // Even if something goes wrong, try with default Panvel coords so the list is never blank
-      const fallback = { lat: 18.9894, lng: 73.1175 }
+      const fallback = { lat: 19.2183, lng: 72.9781 }
       setUserLocation(fallback)
       await fetchNearbyResponders(fallback.lat, fallback.lng)
     } finally {
@@ -106,7 +104,29 @@ export function NearbyResponders() {
   }
 
   useEffect(() => {
+    let watchId: number | null = null
     requestLocation()
+
+    // Real-time live location tracking
+    if (typeof window !== "undefined" && "geolocation" in navigator) {
+      try {
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+            setUserLocation(loc)
+            fetchNearbyResponders(loc.lat, loc.lng)
+          },
+          () => {},
+          { enableHighAccuracy: true, maximumAge: 15000, timeout: 15000 }
+        )
+      } catch {}
+    }
+
+    return () => {
+      if (watchId !== null && typeof window !== "undefined" && "geolocation" in navigator) {
+        navigator.geolocation.clearWatch(watchId)
+      }
+    }
   }, [])
 
   if (loading) {

@@ -11,56 +11,37 @@ export interface GeolocationError {
   message: string
 }
 
-// Default regional center: Panvel (Raigad / Navi Mumbai)
+// Default regional center: Thane (Mumbai MMR)
 export const DEFAULT_COORDS: Coordinates = {
-  lat: 18.9894,
-  lng: 73.1175,
-  city: "Panvel",
+  lat: 19.2183,
+  lng: 72.9781,
+  city: "Thane",
   source: "default"
+}
+
+export function isKurlaGateway(lat: number, lng: number): boolean {
+  return (
+    (Math.abs(lat - 19.076) < 0.02 && Math.abs(lng - 72.877) < 0.02) ||
+    (Math.abs(lat - 19.0728) < 0.02 && Math.abs(lng - 72.8826) < 0.02)
+  )
 }
 
 /**
  * Resolve geolocation from account phone number, area codes, or mobile telecom circles.
- * Supports Panvel, Navi Mumbai, Raigad, Mumbai, and Maharashtra numbers.
  */
 export function resolveLocationFromPhone(phone?: string | null): Coordinates | null {
   if (!phone) return null
   const clean = phone.replace(/[^0-9]/g, "")
   if (!clean || clean.length < 4) return null
 
-  // 1. Panvel / Raigad STD landline code (02143 / 2143)
+  // Panvel / Raigad STD landline code (02143 / 2143)
   if (clean.includes("2143")) {
     return { lat: 18.9894, lng: 73.1175, city: "Panvel", source: "phone" }
   }
 
-  // 2. Navi Mumbai / Mumbai STD codes (022 / 22)
+  // Mumbai / Thane / Navi Mumbai STD codes (022 / 22)
   if (clean.startsWith("022") || clean.startsWith("9122")) {
-    return { lat: 19.0330, lng: 73.0297, city: "Navi Mumbai", source: "phone" }
-  }
-
-  // 3. Indian mobile phone numbers (10 digits)
-  const last10 = clean.slice(-10)
-  if (last10.length === 10) {
-    const p4 = last10.slice(0, 4)
-    // Series 8087 (Swayam / responder phone in DB, registered in Panvel / Raigad / MH Circle)
-    if (p4 === "8087") {
-      return { lat: 18.9894, lng: 73.1175, city: "Panvel", source: "phone" }
-    }
-
-    // Common Maharashtra / Raigad / Panvel mobile series:
-    const mhRaigad = [
-      "8087", "8779", "9422", "9423", "9822", "9823", "9850", "9860", "9890",
-      "9922", "9923", "7020", "7028", "7038", "7709", "7719", "7720",
-      "7875", "8308", "8380", "8390", "8408", "8411", "8412", "8421", "8446"
-    ]
-    if (mhRaigad.includes(p4)) {
-      return { lat: 18.9894, lng: 73.1175, city: "Panvel", source: "phone" }
-    }
-  }
-
-  // If Indian mobile number (+91) or 10-digit number, default to Panvel
-  if (clean.startsWith("91") || clean.length === 10) {
-    return { lat: 18.9894, lng: 73.1175, city: "Panvel", source: "phone" }
+    return { lat: 19.2183, lng: 72.9781, city: "Thane", source: "phone" }
   }
 
   return null
@@ -68,27 +49,10 @@ export function resolveLocationFromPhone(phone?: string | null): Coordinates | n
 
 /**
  * Fetch approximate coordinates from IP geolocation
+ * Sequentially tests providers and skips ISP routing gateways (Kurla)
  */
 async function getIpLocation(): Promise<Coordinates | null> {
-  // Provider 1: ipwho.is (fast, highly accurate for Indian and global IPs, no key required)
-  try {
-    const res = await fetch("https://ipwho.is/", {
-      signal: AbortSignal.timeout(3500)
-    })
-    if (res.ok) {
-      const data = await res.json()
-      if (data && data.success !== false && typeof data.latitude === "number" && typeof data.longitude === "number") {
-        return {
-          lat: data.latitude,
-          lng: data.longitude,
-          city: data.city || data.region,
-          source: "ip"
-        }
-      }
-    }
-  } catch (err) {}
-
-  // Provider 2: freeipapi.com fallback
+  // Provider 1: freeipapi.com (returns accurate city/suburb e.g. Borivali / Thane area)
   try {
     const res = await fetch("https://freeipapi.com/api/json", {
       signal: AbortSignal.timeout(3500)
@@ -96,11 +60,53 @@ async function getIpLocation(): Promise<Coordinates | null> {
     if (res.ok) {
       const data = await res.json()
       if (typeof data.latitude === "number" && typeof data.longitude === "number") {
-        return {
-          lat: data.latitude,
-          lng: data.longitude,
-          city: data.cityName || data.regionName,
-          source: "ip"
+        if (!isKurlaGateway(data.latitude, data.longitude)) {
+          return {
+            lat: data.latitude,
+            lng: data.longitude,
+            city: data.cityName || data.regionName || "Thane",
+            source: "ip"
+          }
+        }
+      }
+    }
+  } catch (err) {}
+
+  // Provider 2: BigDataCloud reverse geocode client (high precision client location)
+  try {
+    const res = await fetch("https://api.bigdatacloud.net/data/reverse-geocode-client", {
+      signal: AbortSignal.timeout(3500)
+    })
+    if (res.ok) {
+      const data = await res.json()
+      if (typeof data.latitude === "number" && typeof data.longitude === "number") {
+        if (!isKurlaGateway(data.latitude, data.longitude)) {
+          return {
+            lat: data.latitude,
+            lng: data.longitude,
+            city: data.locality || data.city || "Thane",
+            source: "ip"
+          }
+        }
+      }
+    }
+  } catch (err) {}
+
+  // Provider 3: ipwho.is fallback
+  try {
+    const res = await fetch("https://ipwho.is/", {
+      signal: AbortSignal.timeout(3500)
+    })
+    if (res.ok) {
+      const data = await res.json()
+      if (data && data.success !== false && typeof data.latitude === "number" && typeof data.longitude === "number") {
+        if (!isKurlaGateway(data.latitude, data.longitude)) {
+          return {
+            lat: data.latitude,
+            lng: data.longitude,
+            city: data.city || data.region || "Thane",
+            source: "ip"
+          }
         }
       }
     }
@@ -110,12 +116,11 @@ async function getIpLocation(): Promise<Coordinates | null> {
 }
 
 /**
- * High-reliability location getter:
- * 1. Checks recent valid GPS cache (< 30 seconds old, GPS source only)
+ * High-reliability live location getter:
+ * 1. Checks recent valid GPS cache (< 15 seconds old, GPS source only)
  * 2. Attempts hardware/browser GPS with 2-tier fallback (High Accuracy -> Wi-Fi network location)
- * 3. Falls back to IP Geolocation (rejecting Kurla ISP gateway)
- * 4. Defaults to Panvel
- * NOTE: Phone-number based location removed — phone prefix is NOT real-time location
+ * 3. Falls back to multi-provider IP Geolocation (rejecting Kurla ISP gateway)
+ * 4. Defaults to current regional center (Thane)
  */
 export const getUserLocation = async (
   forceFresh = false,
@@ -123,28 +128,29 @@ export const getUserLocation = async (
 ): Promise<Coordinates> => {
   if (typeof window === "undefined") return DEFAULT_COORDS
 
-  // 1. Check GPS cache — only accept GPS-sourced coords less than 30 seconds old
+  // Clear any legacy manual city overrides from older sessions
+  try {
+    localStorage.removeItem("bridgex_selected_city")
+  } catch {}
+
+  // 1. Check GPS cache — only accept GPS-sourced coords less than 15 seconds old
   if (!forceFresh) {
     try {
       const cached = localStorage.getItem("bridgex_user_coords")
       if (cached) {
         const parsed = JSON.parse(cached)
-        const isKurla = Math.abs(parsed.lat - 19.076) < 0.015 && Math.abs(parsed.lng - 72.877) < 0.015
         if (
-          !isKurla &&
+          !isKurlaGateway(parsed.lat, parsed.lng) &&
           parsed.lat &&
           parsed.lng &&
           parsed.source === "gps" &&
-          Date.now() - (parsed.time || 0) < 30 * 1000 // 30-second cache only
+          Date.now() - (parsed.time || 0) < 15 * 1000 // 15-second cache only
         ) {
           return { lat: parsed.lat, lng: parsed.lng, accuracy: parsed.accuracy, city: parsed.city, source: "cache" }
         }
       }
     } catch {}
   }
-
-  // Always clear stale/phone-based cache before attempting GPS so previous results don't linger
-  try { localStorage.removeItem("bridgex_user_coords") } catch {}
 
   // 2. Try browser GPS with 2-tier fallback: High Accuracy -> Wi-Fi network triangulation
   if ("geolocation" in navigator) {
@@ -160,18 +166,17 @@ export const getUserLocation = async (
           (err) => reject(err),
           {
             enableHighAccuracy: true,
-            timeout: 10000,  // increased to 10s for better accuracy
-            maximumAge: 0,
+            timeout: 8000,
+            maximumAge: 15000, // allows fresh OS-level cache (15s) to avoid cold-start satellite timeouts
           }
         )
       })
-      const isKurla = Math.abs(pos.lat - 19.076) < 0.01 && Math.abs(pos.lng - 72.877) < 0.01
-      if (!isKurla) {
+      if (!isKurlaGateway(pos.lat, pos.lng)) {
         try { localStorage.setItem("bridgex_user_coords", JSON.stringify({ ...pos, time: Date.now() })) } catch {}
         return pos
       }
     } catch {
-      // High accuracy timed out / unavailable: try standard Wi-Fi network location
+      // High accuracy timed out / unavailable indoors: try standard Wi-Fi network triangulation
       try {
         const pos = await new Promise<Coordinates>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(
@@ -184,13 +189,12 @@ export const getUserLocation = async (
             (err) => reject(err),
             {
               enableHighAccuracy: false,
-              timeout: 6000,
-              maximumAge: 0,  // never use stale GPS fix
+              timeout: 5000,
+              maximumAge: 60000, // network triangulation
             }
           )
         })
-        const isKurla = Math.abs(pos.lat - 19.076) < 0.01 && Math.abs(pos.lng - 72.877) < 0.01
-        if (!isKurla) {
+        if (!isKurlaGateway(pos.lat, pos.lng)) {
           try { localStorage.setItem("bridgex_user_coords", JSON.stringify({ ...pos, time: Date.now() })) } catch {}
           return pos
         }
@@ -198,19 +202,16 @@ export const getUserLocation = async (
     }
   }
 
-  // 3. Try IP-based location (Rejecting Kurla ISP routing gateway)
+  // 3. Try IP-based location (FreeIPApi / BigDataCloud / IPWho, rejecting Kurla ISP gateway)
   const ipLoc = await getIpLocation()
   if (ipLoc) {
-    const isKurla =
-      (Math.abs(ipLoc.lat - 19.076) < 0.02 && Math.abs(ipLoc.lng - 72.877) < 0.02) ||
-      (Math.abs(ipLoc.lat - 19.0728) < 0.02 && Math.abs(ipLoc.lng - 72.8826) < 0.02)
-    if (!isKurla) {
+    if (!isKurlaGateway(ipLoc.lat, ipLoc.lng)) {
       try { localStorage.setItem("bridgex_user_coords", JSON.stringify({ ...ipLoc, time: Date.now() })) } catch {}
       return ipLoc
     }
   }
 
-  // 4. Default to Panvel
+  // 4. Default to Thane
   return DEFAULT_COORDS
 }
 

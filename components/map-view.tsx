@@ -48,13 +48,15 @@ export function MapView() {
   const [facilities, setFacilities] = useState<FacilityMarker[]>([])
   const [activeCategory, setActiveCategory] = useState<string>("all")
 
-  // Auto-acquire user location on mount (auto-detects accurate GPS / phone location)
+  // Auto-acquire user location on mount and stream live updates as user moves
   useEffect(() => {
     let mounted = true
+    let watchId: number | null = null
+
     const initLocation = async () => {
       setLoading(true)
       try {
-        const coords = await getUserLocation(false, user?.phone)
+        const coords = await getUserLocation(true)
         if (mounted && coords) {
           const loc = { lat: coords.lat, lng: coords.lng }
           setUserLocation(loc)
@@ -62,7 +64,7 @@ export function MapView() {
         }
       } catch (err) {
         console.warn("Location init error:", err)
-        const fallback = { lat: 18.9894, lng: 73.1175 }
+        const fallback = { lat: 19.2183, lng: 72.9781 } // Thane regional center
         if (mounted) {
           setUserLocation(fallback)
           await loadMapResources(fallback)
@@ -73,7 +75,39 @@ export function MapView() {
     }
 
     initLocation()
-    return () => { mounted = false }
+
+    // Real-time live GPS tracking: automatically tracks when user moves (e.g. Panvel to Thane)
+    if (typeof window !== "undefined" && "geolocation" in navigator) {
+      try {
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            if (!mounted) return
+            const newLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+            setUserLocation((prev) => {
+              if (!prev) {
+                loadMapResources(newLoc)
+                return newLoc
+              }
+              const dist = calculateDistance(prev.lat, prev.lng, newLoc.lat, newLoc.lng)
+              if (dist > 0.05) { // update if moved > 50 meters
+                loadMapResources(newLoc)
+                return newLoc
+              }
+              return prev
+            })
+          },
+          () => {},
+          { enableHighAccuracy: true, maximumAge: 15000, timeout: 15000 }
+        )
+      } catch {}
+    }
+
+    return () => {
+      mounted = false
+      if (watchId !== null && typeof window !== "undefined" && "geolocation" in navigator) {
+        navigator.geolocation.clearWatch(watchId)
+      }
+    }
   }, [user?.phone])
 
   // Manual refresh GPS location
@@ -81,10 +115,14 @@ export function MapView() {
     setLoading(true)
     try {
       localStorage.removeItem("bridgex_user_coords")
-      const coords = await getUserLocation(true, user?.phone)
+      const coords = await getUserLocation(true)
       const loc = { lat: coords.lat, lng: coords.lng }
       setUserLocation(loc)
       await loadMapResources(loc)
+    } catch {
+      const fallback = { lat: 19.2183, lng: 72.9781 }
+      setUserLocation(fallback)
+      await loadMapResources(fallback)
     } finally {
       setLoading(false)
     }

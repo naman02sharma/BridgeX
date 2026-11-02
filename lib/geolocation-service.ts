@@ -60,14 +60,14 @@ export function formatDistance(meters: number): string {
  */
 export async function getUserLocation(): Promise<{ lat: number; lon: number } | null> {
   try {
-    const coords = await getBaseLocation()
+    const coords = await getBaseLocation(true)
     if (coords && typeof coords.lat === "number" && typeof coords.lng === "number") {
       return { lat: coords.lat, lon: coords.lng }
     }
   } catch (err) {
     console.warn("Location error:", err)
   }
-  return { lat: 18.9894, lon: 73.1175 } // Default to Panvel regional center
+  return { lat: 19.2183, lon: 72.9781 } // Default to Thane regional center
 }
 
 /**

@@ -178,9 +178,47 @@ export function SOSInterfaceV2() {
     }
   ]
 
-  // Get user location on mount
+  // Get user location on mount and watch real-time updates as user moves
   useEffect(() => {
-    getLocation()
+    let watchId: number | null = null
+    getLocation(true)
+
+    if (typeof window !== "undefined" && "geolocation" in navigator) {
+      try {
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            const newLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+            setLocation((prev) => {
+              if (!prev || Math.abs(prev.lat - newLoc.lat) > 0.0005 || Math.abs(prev.lng - newLoc.lng) > 0.0005) {
+                fetchNearbyEmergencyFacilities(newLoc.lat, newLoc.lng)
+                fetch(`/api/places?reverse=1&lat=${newLoc.lat}&lon=${newLoc.lng}`)
+                  .then((r) => r.json())
+                  .then((data) => {
+                    if (data?.display_name) {
+                      setGeocodedArea(data.display_name)
+                      setDetailedAddress((prev) => (prev ? prev : data.display_name))
+                    }
+                  })
+                  .catch(() => {})
+                return newLoc
+              }
+              return prev
+            })
+            if (pos.coords.accuracy) {
+              setLocationAccuracy(Math.round(pos.coords.accuracy))
+            }
+          },
+          () => {},
+          { enableHighAccuracy: true, maximumAge: 15000, timeout: 15000 }
+        )
+      } catch {}
+    }
+
+    return () => {
+      if (watchId !== null && typeof window !== "undefined" && "geolocation" in navigator) {
+        navigator.geolocation.clearWatch(watchId)
+      }
+    }
   }, [])
 
   // Panic timer countdown
@@ -385,7 +423,7 @@ export function SOSInterfaceV2() {
         .catch(() => {})
     } catch (error) {
       console.warn("Could not get location:", error)
-      const fallbackLoc = { lat: 18.9894, lng: 73.1175 }
+      const fallbackLoc = { lat: 19.2183, lng: 72.9781 }
       setLocation(fallbackLoc)
       fetchNearbyEmergencyFacilities(fallbackLoc.lat, fallbackLoc.lng)
     } finally {
